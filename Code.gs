@@ -21,19 +21,21 @@ function showGuide() {
 }
 function aboutDialog() {
 
+  //TODO
 }
 
 function sefariaGet() {
-      
+      var perek = true;
+      var pasuk = false;
       var result = DocumentApp.getUi().prompt('Search for texts',
       'Enter the name of the Jewish text you\'re looking for:', DocumentApp.getUi().ButtonSet.OK_CANCEL);
  
-  
+  //TODO: add suport for enter-as-click
   if (result.getSelectedButton() == DocumentApp.getUi().Button.OK) {
     
     var textSearch = result.getResponseText();
     textSearch = textSearch.split(" ");
-   
+    //TODO: add support for snippets of text/Gemara
     var url = 'http://www.sefaria.org/api/texts/'
         +textSearch[0].charAt(0).toUpperCase() + textSearch[0].slice(1); //Capitalization
         +'.'
@@ -43,11 +45,26 @@ function sefariaGet() {
     var json = response.getContentText();
     var data = JSON.parse(json);
       if(data.he != undefined) {
-        
-    var cells = [
-   [textSearch[0]+" "+textSearch[1], data.heTitle],
-   [data.text, data.he]
- ];
+        //TODO get rid of b, i, u pre-html sefaria tags
+    //TODO: make it fancy
+        if (/\:/.test(textSearch[1])) {
+               // string has perek/pasuk
+               perek = false;
+               pasuk  = true;
+               var pasukRef = (textSearch[1].split(":"))[1];
+        }
+        if(perek){
+           var cells = [
+           [textSearch[0]+" "+textSearch[1], data.heTitle],
+           [data.text, data.he]
+           ];
+        }
+        if(pasuk) {
+          var cells = [
+           [textSearch[0]+" "+textSearch[1], data.heTitle],
+           [emendedTextEn, emendedTextHe]
+           ];
+        }
     var tableStyle = {};
           tableStyle[DocumentApp.Attribute.FONT_FAMILY] =
                 DocumentApp.FontFamily.TIMES_NEW_ROMAN;
