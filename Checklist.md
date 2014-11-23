@@ -1,5 +1,6 @@
 Google Checklist- 
 =================
+Taken from <a href="https://developers.google.com/apps-script/add-ons/publish">here.</a>
 <br>
 <h2>General</h2>
 <br>
