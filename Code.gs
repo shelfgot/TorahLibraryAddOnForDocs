@@ -7,8 +7,7 @@ function onOpen() {
   DocumentApp.getUi().createMenu('Sefaria Library')
       .addItem('Search Sefaria', 'sefariaGet')
       .addItem('Transliteration Guidelines', 'showGuide')
-      
-     .addItem('About', 'aboutDialog')
+      .addItem('About', 'aboutDialog')
       .addToUi();
 }
 function showGuide() {
