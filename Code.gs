@@ -7,7 +7,8 @@ function onOpen() {
   DocumentApp.getUi().createMenu('Sefaria Library')
       .addItem('Search Sefaria', 'sefariaGet')
       .addItem('Transliteration Guidelines', 'showGuide')
-      .addItem('About', 'aboutDialog')
+      
+     .addItem('About', 'aboutDialog')
       .addToUi();
 }
 function showGuide() {
@@ -44,37 +45,27 @@ function sefariaGet() {
     var json = response.getContentText();
     var data = JSON.parse(json);
       if(data.he != undefined) {
-        //TODO get rid of b, i, u pre-html sefaria tags
-    //TODO: make it fancy
-        if (/\:/.test(textSearch[1])) {
+           //TODO get rid of b, i, u pre-html sefaria tags
+           //TODO: make it fancy
+           if (/\:/.test(textSearch[1])) {
                // string has perek/pasuk
-               perek = false;
-               pasuk  = true;
                var pasukRef = (textSearch[1].split(":"))[1];
-        }
-        if(perek){
+               data.text= data.text[pasukRef-1];
+               data.he = data.he[pasukRef-1];
+           }
+        
            var cells = [
            [textSearch[0]+" "+textSearch[1], data.heTitle],
            [data.text, data.he]
            ];
-        }
-        if(pasuk) {
-          var cells = [
-           [textSearch[0]+" "+textSearch[1], data.heTitle],
-           [emendedTextEn, emendedTextHe]
-           ];
-        }
-    var tableStyle = {};
-          tableStyle[DocumentApp.Attribute.FONT_FAMILY] =
+       
+           var tableStyle = {};
+               tableStyle[DocumentApp.Attribute.FONT_FAMILY] =
                 DocumentApp.FontFamily.TIMES_NEW_ROMAN;
-          tableStyle[DocumentApp.Attribute.FONT_SIZE] =
+               tableStyle[DocumentApp.Attribute.FONT_SIZE] =
                 12;
-    var doc = DocumentApp.getActiveDocument().getBody();
-    doc.appendTable(cells).setAttributes(tableStyle);
+           var doc = DocumentApp.getActiveDocument().getBody();
+           doc.appendTable(cells).setAttributes(tableStyle);
     } 
   }
-    
-
-
-
 }
