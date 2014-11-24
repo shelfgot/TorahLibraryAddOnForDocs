@@ -50,8 +50,22 @@ function sefariaGet() {
            if (/\:/.test(textSearch[1])) {
                // string has perek/pasuk
                var pasukRef = (textSearch[1].split(":"))[1];
-               data.text= data.text[pasukRef-1];
-               data.he = data.he[pasukRef-1];
+             if (/\-/.test(pasukRef)) { 
+                 var enEmend = "";
+                 var heEmend = "";
+                 var psukimRef = (pasukRef.split("-"));
+                 for (var i = psukimRef[0]-1; i<psukimRef[1]-1; i++) {
+                      enEmend+=data.text[i];
+                      heEmend+=data.he[i];
+                      }
+                 data.text= enEmend;
+                 data.he = heEmend; 
+               }
+               else {
+                 data.text= data.text[pasukRef-1];
+                 data.he = data.he[pasukRef-1];
+               }
+        
            }
         
            var cells = [
