@@ -54,7 +54,7 @@ function sefariaGet() {
                  var enEmend = "";
                  var heEmend = "";
                  var psukimRef = (pasukRef.split("-"));
-                 for (var i = psukimRef[0]-1; i<psukimRef[1]-1; i++) {
+                 for (var i = psukimRef[0]-1; i<psukimRef[1]; i++) {
                       enEmend+=data.text[i];
                       heEmend+=data.he[i];
                       }
