@@ -25,8 +25,6 @@ function aboutDialog() {
 }
 
 function sefariaGet() {
-      var perek = true;
-      var pasuk = false;
       var result = DocumentApp.getUi().prompt('Search for texts',
       'Enter the name of the Jewish text you\'re looking for:', DocumentApp.getUi().ButtonSet.OK_CANCEL);
  
@@ -37,7 +35,7 @@ function sefariaGet() {
     textSearch = textSearch.split(" ");
     //TODO: add support for snippets of text/Gemara
     var url = 'http://www.sefaria.org/api/texts/'
-        +textSearch[0].charAt(0).toUpperCase() + textSearch[0].slice(1); //Capitalization
+        +textSearch[0]//automatic capitalization: thanks sefaria
         +'.'
         +textSearch[1];
     
@@ -51,6 +49,7 @@ function sefariaGet() {
                // string has perek/pasuk
                var pasukRef = (textSearch[1].split(":"))[1];
              if (/\-/.test(pasukRef)) { 
+                 // string has - (not one pasuk, but many psukim)
                  var enEmend = "";
                  var heEmend = "";
                  var psukimRef = (pasukRef.split("-"));
@@ -61,10 +60,10 @@ function sefariaGet() {
                  data.text= enEmend;
                  data.he = heEmend; 
                }
-               else {
-                 data.text= data.text[pasukRef-1];
-                 data.he = data.he[pasukRef-1];
-               }
+             else {
+               data.text= data.text[pasukRef-1];
+               data.he = data.he[pasukRef-1];
+             }
         
            }
         
@@ -80,6 +79,10 @@ function sefariaGet() {
                 12;
            var doc = DocumentApp.getActiveDocument().getBody();
            doc.appendTable(cells).setAttributes(tableStyle);
-    } 
+    }
+    else {
+          DocumentApp.getUi().alert("Sefer or Perek not found.");
+          sefariaGet();
+    }
   }
 }
