@@ -21,7 +21,6 @@ function showGuide() {
 }
 function aboutDialog() {
 
-  //TODO
 }
 
 function sefariaGet() {
@@ -31,25 +30,26 @@ function sefariaGet() {
   //TODO: add suport for enter-as-click
   if (result.getSelectedButton() == DocumentApp.getUi().Button.OK) {
     
-    var textSearch = result.getResponseText();
+    var searchText = result.getResponseText();
+  }
+  findRef(searchText);
+}
+function findRef(textSearch) {
     textSearch = textSearch.split(" ");
-    //TODO: add support for snippets of text/Gemara
     var url = 'http://www.sefaria.org/api/texts/'
         +textSearch[0]//automatic capitalization: thanks sefaria
         +'.'
         +textSearch[1];
-    
     var response = UrlFetchApp.fetch(url);
     var json = response.getContentText();
     var data = JSON.parse(json);
       if(data.he != undefined) {
            //TODO get rid of b, i, u pre-html sefaria tags
-           //TODO: make it fancy
            if (/\:/.test(textSearch[1])) {
                // string has perek/pasuk
                var pasukRef = (textSearch[1].split(":"))[1];
              if (/\-/.test(pasukRef)) { 
-                 // string has - (not one pasuk, but many psukim)
+                 // string has "-" (not one pasuk, but many psukim)
                  var enEmend = [];
                  var heEmend = [];
                  var psukimRef = (pasukRef.split("-"));
@@ -71,19 +71,18 @@ function sefariaGet() {
              }
            var emendedTextEn = "", emendedTextHe = "";
            }
+           else {
+           var pasukRef = 1;
+           var emendedTextEn = "", emendedTextHe = "";
+           }
            for(var j = 0; j<data.text.length; j++) {
-              data.text[j]+="\n"; //add new tab
-              data.text[j] = "("+(j+parseInt(pasukRef))+")"+data.text[j]; //add pasuk number
+              data.text[j] = "("+(j+parseInt(pasukRef))+")"+data.text[j]+"\n"; //add pasuk number
               /*var numResponse = UrlFetchApp.fetch("http://hebrew.jdotjdot.com/encode?input="+j);
                var numData = numResponse.getContentText();
                var numJson = JSON.parse(numData);
                Logger.log(numJson);*/
                var jdotNum= ""; //?//;
-               
-             
-              
-              data.he[j]+="\n"; //add tab;
-              data.he[j] = "("+jdotNum+")"+data.he[j];
+              data.he[j] = "("+jdotNum+")"+data.he[j]+"\n";
               emendedTextEn+= data.text[j];
               emendedTextHe+= data.he[j];
            };
@@ -105,11 +104,11 @@ function sefariaGet() {
           sefariaGet();
     }
   }
-}
+
 function sefariaSearch() {
       var result = DocumentApp.getUi().prompt('Search Sefaria',
                                               'Enter phrase:', DocumentApp.getUi().ButtonSet.OK_CANCEL);
- 
+      
        //TODO: add suport for enter-as-click
        if (result.getSelectedButton() == DocumentApp.getUi().Button.OK) {
           var textSearch = result.getResponseText();
@@ -120,8 +119,11 @@ function sefariaSearch() {
           var searchJson = searchResponse.getContentText();
           var searchData = JSON.parse(searchJson);
           DocumentApp.getUi().alert(searchData["hits"]["total"]+" hits.");
-          //searchData["hits"]["hits"][0]["_id"]
-       }
+        
+         searchData["hits"]["hits"].forEach(function(m) {
+            findRef(m["_source"]["ref"])
+         });
+        }
 } 
           ///                                                     
         //////                    
