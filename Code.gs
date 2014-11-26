@@ -7,7 +7,6 @@ function onOpen() {
   DocumentApp.getUi().createMenu('Sefaria Library')
       .addItem('Search Sefaria', 'sefariaGet')
       .addItem('Transliteration Guidelines', 'showGuide')
-      
       .addItem('About', 'aboutDialog')
       .addToUi();
 }
@@ -73,10 +72,21 @@ function sefariaGet() {
            }
            for(var j = 0; j<data.text.length; j++) {
               data.text[j]+="\n"; //add new tab
-              data.he[j]+="\n";
+              data.text[j] = "("+(j+parseInt(pasukRef))+")"+data.text[j]; //add pasuk number
+              var numResponse = UrlFetchApp.fetch("http://hebrew.jdotjdot.com/encode?input="+j);
+               var numData = response.getContentText();
+               var numJson = JSON.parse(numData);
+               
+               var jdotNum= 23//?//;
+               
+             
+              
+              data.he[j]+="\n"; //add tab;
+              data.he[j] = "("+jdotNum+")"+data.he[j];
               emendedTextEn+= data.text[j];
               emendedTextHe+= data.he[j];
            };
+           DocumentApp.getUi().alert(numJson)
            var cells = [
            [textSearch[0]+" "+textSearch[1], data.heTitle],
            [emendedTextEn, emendedTextHe]
@@ -96,3 +106,10 @@ function sefariaGet() {
     }
   }
 }
+          ///                                                     
+        //////                    
+      ///****//                  
+    ////*///////                 
+     //****///          
+      //////
+       ///
