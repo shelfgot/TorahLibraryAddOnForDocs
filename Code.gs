@@ -5,7 +5,8 @@ function onInstall() {
 function onOpen() {
   // Add a menu with some items, some separators, and a sub-menu.
   DocumentApp.getUi().createMenu('Sefaria Library')
-      .addItem('Search Sefaria', 'sefariaGet')
+      .addItem('Sefaria Library', 'sefariaGet')
+      .addItem('Search Sefaria', 'sefariaSearch')
       .addItem('Transliteration Guidelines', 'showGuide')
       .addItem('About', 'aboutDialog')
       .addToUi();
@@ -73,11 +74,11 @@ function sefariaGet() {
            for(var j = 0; j<data.text.length; j++) {
               data.text[j]+="\n"; //add new tab
               data.text[j] = "("+(j+parseInt(pasukRef))+")"+data.text[j]; //add pasuk number
-              var numResponse = UrlFetchApp.fetch("http://hebrew.jdotjdot.com/encode?input="+j);
-               var numData = response.getContentText();
+              /*var numResponse = UrlFetchApp.fetch("http://hebrew.jdotjdot.com/encode?input="+j);
+               var numData = numResponse.getContentText();
                var numJson = JSON.parse(numData);
-               
-               var jdotNum= 23//?//;
+               Logger.log(numJson);*/
+               var jdotNum= ""; //?//;
                
              
               
@@ -86,7 +87,6 @@ function sefariaGet() {
               emendedTextEn+= data.text[j];
               emendedTextHe+= data.he[j];
            };
-           DocumentApp.getUi().alert(numJson)
            var cells = [
            [textSearch[0]+" "+textSearch[1], data.heTitle],
            [emendedTextEn, emendedTextHe]
@@ -106,6 +106,23 @@ function sefariaGet() {
     }
   }
 }
+function sefariaSearch() {
+      var result = DocumentApp.getUi().prompt('Search Sefaria',
+                                              'Enter phrase:', DocumentApp.getUi().ButtonSet.OK_CANCEL);
+ 
+       //TODO: add suport for enter-as-click
+       if (result.getSelectedButton() == DocumentApp.getUi().Button.OK) {
+          var textSearch = result.getResponseText();
+          //TODO: add support for snippets of text/Gemara
+          var searchUrl = 'http://search.sefaria.org:9200/sefaria/_search?q='
+          +textSearch;
+          var searchResponse = UrlFetchApp.fetch(searchUrl);
+          var searchJson = searchResponse.getContentText();
+          var searchData = JSON.parse(searchJson);
+          DocumentApp.getUi().alert(searchData["hits"]["total"]+" hits.");
+          //searchData["hits"]["hits"][0]["_id"]
+       }
+} 
           ///                                                     
         //////                    
       ///****//                  
