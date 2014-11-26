@@ -8,7 +8,7 @@ function onOpen() {
       .addItem('Search Sefaria', 'sefariaGet')
       .addItem('Transliteration Guidelines', 'showGuide')
       
-     .addItem('About', 'aboutDialog')
+      .addItem('About', 'aboutDialog')
       .addToUi();
 }
 function showGuide() {
@@ -50,26 +50,36 @@ function sefariaGet() {
                var pasukRef = (textSearch[1].split(":"))[1];
              if (/\-/.test(pasukRef)) { 
                  // string has - (not one pasuk, but many psukim)
-                 var enEmend = "";
-                 var heEmend = "";
+                 var enEmend = [];
+                 var heEmend = [];
                  var psukimRef = (pasukRef.split("-"));
                  for (var i = psukimRef[0]-1; i<psukimRef[1]; i++) {
-                      enEmend+=data.text[i];
-                      heEmend+=data.he[i];
+                      enEmend.push(data.text[i]);
+                      heEmend.push(data.he[i]);
                       }
                  data.text= enEmend;
                  data.he = heEmend; 
                }
              else {
-               data.text= data.text[pasukRef-1];
-               data.he = data.he[pasukRef-1];
+               enPasuk = "", hePasuk= "";
+               enPasuk= data.text[pasukRef-1];
+               data.text= new Array(1);
+               data.text[0] = enPasuk;
+               hePasuk = data.he[pasukRef-1];
+               data.he= new Array(1);
+               data.he[0] = hePasuk;
              }
-        
+           var emendedTextEn = "", emendedTextHe = "";
            }
-        
+           for(var j = 0; j<data.text.length; j++) {
+              data.text[j]+="\n"; //add new tab
+              data.he[j]+="\n";
+              emendedTextEn+= data.text[j];
+              emendedTextHe+= data.he[j];
+           };
            var cells = [
            [textSearch[0]+" "+textSearch[1], data.heTitle],
-           [data.text, data.he]
+           [emendedTextEn, emendedTextHe]
            ];
        
            var tableStyle = {};
