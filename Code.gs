@@ -35,19 +35,19 @@ function sefariaGet() {
   findRef(searchText);
 }
 function findRef(textSearch) {
-    textSearch = textSearch.split(" ");
-    var url = 'http://www.sefaria.org/api/texts/'
-        +textSearch[0]//automatic capitalization: thanks sefaria
-        +'.'
-        +textSearch[1];
+    var textSearchOr = textSearch;
+    textSearch.replace(/( )(\D)/, "_$2");
+    var textSearchSplit = textSearch.split(" ");
+    textSearch.replace(/( )(\d)/, ".$2");
+      var url = 'http://www.sefaria.org/api/texts/'
+        +textSearch;
     var response = UrlFetchApp.fetch(url);
     var json = response.getContentText();
     var data = JSON.parse(json);
       if(data.he != undefined) {
-           //TODO get rid of b, i, u pre-html sefaria tags
-           if (/\:/.test(textSearch[1])) {
+           if (/\:/.test(textSearchSplit[1])) {
                // string has perek/pasuk
-               var pasukRef = (textSearch[1].split(":"))[1];
+               var pasukRef = (textSearchSplit[1].split(":"))[1];
              if (/\-/.test(pasukRef)) { 
                  // string has "-" (not one pasuk, but many psukim)
                  var enEmend = [];
@@ -61,7 +61,7 @@ function findRef(textSearch) {
                  data.he = heEmend; 
                }
              else {
-               enPasuk = "", hePasuk= "";
+               var enPasuk = "", hePasuk= "";
                enPasuk= data.text[pasukRef-1];
                data.text= new Array(1);
                data.text[0] = enPasuk;
@@ -87,7 +87,7 @@ function findRef(textSearch) {
               emendedTextHe+= data.he[j];
            };
            var cells = [
-           [textSearch[0]+" "+textSearch[1], data.heTitle],
+           [textSearchOr, data.heTitle],
            [emendedTextEn, emendedTextHe]
            ];
        
@@ -122,8 +122,7 @@ function sefariaSearch() {
         
          searchData["hits"]["hits"].forEach(function(m) {
             findRef(m["_source"]["ref"])
-         });
-        }
+         });}
 } 
           ///                                                     
         //////                    
