@@ -75,17 +75,17 @@ function findRef(textSearch) {
            var pasukRef = 1;
            var emendedTextEn = "", emendedTextHe = "";
            }
-           for(var j = 0; j<data.text.length; j++) {
-              data.text[j] = "("+(j+parseInt(pasukRef))+")"+data.text[j]+"\n"; //add pasuk number
+          for(var j = 0; j<data.text.length; j++) {
+              data.text[j] = "("+(j+parseInt(pasukRef))+")"+data.text[j]+"\r"; //add pasuk number
               var jUrl = "http://hebrew.jdotjdot.com/encode?input="+(j+1);
               var numResponse = UrlFetchApp.fetch(jUrl);
               var jdotNum = numResponse.getContentText();
-              data.he[j] = "("+jdotNum+")"+data.he[j]+"\n";
+              data.he[j] = "("+jdotNum+")"+data.he[j]+"                                                                                                ";
               emendedTextEn+= data.text[j];
               emendedTextHe+= data.he[j];
            };
            var cells = [
-           [textSearchOr, data.heTitle],
+           [textSearchOr, data.heTitle /*add perek num*/],
            [emendedTextEn, ""]
            ];
        
@@ -95,11 +95,11 @@ function findRef(textSearch) {
                tableStyle[DocumentApp.Attribute.FONT_SIZE] =
                 12;
            var doc = DocumentApp.getActiveDocument().getBody();
-           doc.appendTable(cells).setAttributes(tableStyle).getCell(1,1).insertParagraph(0, emendedTextHe).setLeftToRight(false);
+           doc.appendTable(cells).setAttributes(tableStyle).getCell(1,1).insertParagraph(0, data.he).setLeftToRight(false);
     }
     else {
-          DocumentApp.getUi().alert("Sefer or Perek not found.");
-          sefariaGet();
+        DocumentApp.getUi().alert("Sefer or Perek not found.");
+        sefariaGet();
     }
   }
 
@@ -121,10 +121,7 @@ function sefariaSearch() {
          searchData["hits"]["hits"].forEach(function(m) {
             findRef(m["_source"]["ref"])
          });
-        
-         
-         
-       }
+      }
 } 
           ///                                                     
         //////                    
