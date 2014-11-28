@@ -24,7 +24,7 @@ function aboutDialog() {
 }
 
 function sefariaGet() {
-      var result = DocumentApp.getUi().prompt('Search for texts',
+ var result = DocumentApp.getUi().prompt('Search for texts',
       'Enter the name of the Jewish text you\'re looking for:', DocumentApp.getUi().ButtonSet.OK_CANCEL);
  
   //TODO: add suport for enter-as-click
@@ -77,7 +77,7 @@ function findRef(textSearch) {
            }
            for(var j = 0; j<data.text.length; j++) {
               data.text[j] = "("+(j+parseInt(pasukRef))+")"+data.text[j]+"\n"; //add pasuk number
-              var jUrl = "http://hebrew.jdotjdot.com/encode?input="+j;
+              var jUrl = "http://hebrew.jdotjdot.com/encode?input="+(j+1);
               var numResponse = UrlFetchApp.fetch(jUrl);
               var jdotNum = numResponse.getContentText();
               data.he[j] = "("+jdotNum+")"+data.he[j]+"\n";
@@ -94,9 +94,8 @@ function findRef(textSearch) {
                 DocumentApp.FontFamily.TIMES_NEW_ROMAN;
                tableStyle[DocumentApp.Attribute.FONT_SIZE] =
                 12;
-              
            var doc = DocumentApp.getActiveDocument().getBody();
-           doc.appendTable(cells).setAttributes(tableStyle).getCell(1,1).insertParagraph(0, emendedTextHe).setLeftToRight(0);
+           doc.appendTable(cells).setAttributes(tableStyle).getCell(1,1).insertParagraph(0, emendedTextHe).setLeftToRight(false);
     }
     else {
           DocumentApp.getUi().alert("Sefer or Perek not found.");
