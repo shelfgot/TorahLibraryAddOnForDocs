@@ -77,18 +77,16 @@ function findRef(textSearch) {
            }
            for(var j = 0; j<data.text.length; j++) {
               data.text[j] = "("+(j+parseInt(pasukRef))+")"+data.text[j]+"\n"; //add pasuk number
-              /*var numResponse = UrlFetchApp.fetch("http://hebrew.jdotjdot.com/encode?input="+j);
-               var numData = numResponse.getContentText();
-               var numJson = JSON.parse(numData);
-               Logger.log(numJson);*/
-               var jdotNum= ""; //?//;
+              var jUrl = "http://hebrew.jdotjdot.com/encode?input="+j;
+              var numResponse = UrlFetchApp.fetch(jUrl);
+              var jdotNum = numResponse.getContentText();
               data.he[j] = "("+jdotNum+")"+data.he[j]+"\n";
               emendedTextEn+= data.text[j];
               emendedTextHe+= data.he[j];
            };
            var cells = [
            [textSearchOr, data.heTitle],
-           [emendedTextEn, emendedTextHe]
+           [emendedTextEn, ""]
            ];
        
            var tableStyle = {};
@@ -96,8 +94,9 @@ function findRef(textSearch) {
                 DocumentApp.FontFamily.TIMES_NEW_ROMAN;
                tableStyle[DocumentApp.Attribute.FONT_SIZE] =
                 12;
+              
            var doc = DocumentApp.getActiveDocument().getBody();
-           doc.appendTable(cells).setAttributes(tableStyle);
+           doc.appendTable(cells).setAttributes(tableStyle).getCell(1,1).insertParagraph(0, emendedTextHe).setLeftToRight(0);
     }
     else {
           DocumentApp.getUi().alert("Sefer or Perek not found.");
@@ -122,7 +121,11 @@ function sefariaSearch() {
         
          searchData["hits"]["hits"].forEach(function(m) {
             findRef(m["_source"]["ref"])
-         });}
+         });
+        
+         
+         
+       }
 } 
           ///                                                     
         //////                    
