@@ -82,7 +82,7 @@ function findRef(textSearch) {
               var jUrl = "http://hebrew.jdotjdot.com/encode?input="+parseInt(parseInt(j)+parseInt(pasukNum));
               var numResponse = UrlFetchApp.fetch(jUrl);
               var jdotNum = numResponse.getContentText();
-              data.he[j] = "("+jdotNum+")"+data.he[j]+"                                                                                                ";
+              data.he[j] = "("+jdotNum+")"+data.he[j]+"\n";
               emendedTextEn+= data.text[j];
               emendedTextHe = emendedTextHe + data.he[j];
            };
@@ -97,7 +97,7 @@ function findRef(textSearch) {
                tableStyle[DocumentApp.Attribute.FONT_SIZE] =
                 12;
            var doc = DocumentApp.getActiveDocument().getBody();
-           doc.appendTable(cells).setAttributes(tableStyle).getCell(1,1).insertParagraph(0, data.he).setLeftToRight(false);
+           doc.appendTable(cells).setAttributes(tableStyle).getCell(1,1).insertParagraph(0, "").setLeftToRight(false).appendText(emendedTextHe);
     }
     else {
         DocumentApp.getUi().alert("Sefer or Perek not found.");
