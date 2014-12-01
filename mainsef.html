@@ -22,7 +22,13 @@ $('.blue').click(function() {
          var input = $('.textRef').val();
          google.script.run.findRef(input);
      });
+ $('.textRef').keyup(function(e) {
+      if (e.keyCode === 13) {
+         $('.blue').click();
+      }
+   });
 $('.close').click(function() {
          google.script.host.close();
      });
+</script>
 </script>
