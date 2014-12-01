@@ -5,9 +5,8 @@ function onInstall() {
 function onOpen() {
   // Add a menu with some items, some separators, and a sub-menu.
   DocumentApp.getUi().createMenu('Sefaria Library')
-      .addItem('Sefaria Library', 'sefariaGet')
+      .addItem('Sefaria Library', 'sefariaHTML')
       .addItem('Search Sefaria', 'sefariaSearch')
-      .addItem('Transliteration Guidelines', 'showGuide')
       .addItem('About', 'aboutDialog')
       .addToUi();
 }
@@ -22,17 +21,12 @@ function showGuide() {
 function aboutDialog() {
 
 }
-
-function sefariaGet() {
- var result = DocumentApp.getUi().prompt('Search for texts',
-      'Enter the name of the Jewish text you\'re looking for:', DocumentApp.getUi().ButtonSet.OK_CANCEL);
- 
-  //TODO: add suport for enter-as-click
-  if (result.getSelectedButton() == DocumentApp.getUi().Button.OK) {
-    
-    var searchText = result.getResponseText();
-  }
-  findRef(searchText);
+function sefariaHTML() {
+ var sefGetHtml = HtmlService.createHtmlOutputFromFile('mainsef')
+          .setWidth(300)
+          .setHeight(500);
+      DocumentApp.getUi() 
+          .showModalDialog(sefGetHtml, 'Insert a text from the Sefaria Library');
 }
 function findRef(textSearch) {
     var textSearchOr = textSearch;
@@ -86,6 +80,7 @@ function findRef(textSearch) {
               emendedTextEn+= data.text[j];
               emendedTextHe = emendedTextHe + data.he[j];
            };
+           // emendedTextEn.replace(/(<(\D)>)([^<>])+(<\/(\D)>)/g, ""); //Strip html tags
            var cells = [
            [textSearchOr, data.heTitle /*add perek num*/],
            [emendedTextEn, ""]
@@ -124,10 +119,10 @@ function sefariaSearch() {
             findRef(m["_source"]["ref"])
          });}
 } 
-          ///                                                     
-        //////                    
-      ///****//                  
-    ////*///////                 
+          ///                                         //        \
+        //////                                      \     \\\\\  \\\
+      ///****//                                      \         \    \
+    ////*///////                                      \     \   \    \          
      //****///          
       //////
        ///
