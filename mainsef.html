@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons.css">
+
+<style>
+
+</style>
+<div class="block" id="button-bar">
+      <button class="blue" id="run-sefaria">Insert Text</button>
+      <button class="close" id="close" style="position: absolute; left: 93px;">Close</button>
+      <a href="http://www.sefaria.org/texts">
+      <button id="text-directory" style="float:right;">Show all Texts</button>
+      </a>
+    </div>
+<input type="text" class="textRef" style="width: 150px; margin-top: 20px;  width: 300px;" placeholder="Text">
+<div class="sidebar bottom">
+  <span class="gray branding-text">Sefaria AddOn by <a href="http://shlomiarduino.net46.net/">Shlomi Helfgot</a></span>
+</div>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
+</script>
+
+<script>
+$('.blue').click(function() {
+         var input = $('.textRef').val();
+         google.script.run.findRef(input);
+     });
+$('.close').click(function() {
+         google.script.host.close();
+     });
+</script>
