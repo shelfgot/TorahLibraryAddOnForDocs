@@ -1,10 +1,9 @@
 function onInstall() {
   onOpen();
 }
-
 function onOpen() {
   // Add a menu with some items, some separators, and a sub-menu.
-  DocumentApp.getUi().createMenu('Sefaria Library')
+  DocumentApp.getUi().createAddonMenu()
       .addItem('Sefaria Library', 'sefariaHTML')
       .addItem('Search Sefaria', 'sefariaSearch')
       .addItem('About', 'aboutDialog')
@@ -16,7 +15,6 @@ function showGuide() {
           .setHeight(400);
       DocumentApp.getUi() 
           .showModalDialog(html, 'Sefaria Transliteration Guidelines');
-
 }
 function aboutDialog() {
 
@@ -81,6 +79,11 @@ function findRef(textSearch) {
               emendedTextHe = emendedTextHe + data.he[j];
            };
            // emendedTextEn.replace(/(<(\D)>)([^<>])+(<\/(\D)>)/g, ""); //Strip html tags
+           var numjUrl = "http://hebrew.jdotjdot.com/encode?input="+data.sections[0];
+           var numnumResponse = UrlFetchApp.fetch(numjUrl);
+           var perekNumero = numnumResponse.getContentText();
+           data.heTitle = data.heTitle +" "+ perekNumero;
+           
            var cells = [
            [textSearchOr, data.heTitle /*add perek num*/],
            [emendedTextEn, ""]
@@ -99,15 +102,11 @@ function findRef(textSearch) {
         sefariaGet();
     }
   }
-
 function sefariaSearch() {
       var result = DocumentApp.getUi().prompt('Search Sefaria',
                                               'Enter phrase:', DocumentApp.getUi().ButtonSet.OK_CANCEL);
-      
-       //TODO: add suport for enter-as-click
        if (result.getSelectedButton() == DocumentApp.getUi().Button.OK) {
           var textSearch = result.getResponseText();
-          //TODO: add support for snippets of text/Gemara
           var searchUrl = 'http://search.sefaria.org:9200/sefaria/_search?q='
           +textSearch;
           var searchResponse = UrlFetchApp.fetch(searchUrl);
@@ -116,7 +115,7 @@ function sefariaSearch() {
           DocumentApp.getUi().alert(searchData["hits"]["total"]+" hits.");
         
          searchData["hits"]["hits"].forEach(function(m) {
-            findRef(m["_source"]["ref"])
+            findRef(m["_source"]["ref"]);
          });}
 } 
           ///                                         //        \
