@@ -4,10 +4,10 @@ Taken from the Google Publishing checklist <a href="https://developers.google.co
 <br>
 <h2>General</h2>
 <br>
-X - The add-on must be fully functional — it can't be a “work in progress.”- (<b>3</b>) <br>
-X - The script has been tested with multiple active users.- (<b>4</b>) <br>
+UnderstandableX - The add-on must be fully functional — it can't be a “work in progress.”- (<b>3</b>) <br>
+UnderstandableX - The script has been tested with multiple active users.- (<b>4</b>) <br>
 :) - The design adheres to the UI style guide.<br>
-X - The design should not use the Ui interface
+:) - The design should not use the Ui interface
 <h2>Technical</h2><br>
 
 :) - The add-on script is bound to a Sheets, Docs, or Forms file.<br>
