@@ -1,7 +1,6 @@
 <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons.css">
-
+<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/themes/smoothness/jquery-ui.css" />
 <style>
-
 </style>
 <div class="block" id="button-bar">
       <button class="blue" id="run-sefaria">Insert Text</button>
@@ -12,12 +11,23 @@
     </div>
 <input type="text" class="textRef" style="width: 150px; margin-top: 20px;  width: 300px;" placeholder="Text">
 <div class="sidebar bottom">
-  <span class="gray branding-text">Sefaria AddOn by <a href="http://shlomiarduino.net46.net/">Shlomi Helfgot</a></span>
+
+<div class="suggestions">
+</div>
+
+  <span class="gray branding-text">Sefaria AddOn by <a href="http://www.github.com/shman/">Shlomi Helfgot</a></span>
 </div>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
 </script>
+<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
 
 <script>
+                  
+var sefTitles = ["Shemot", "Bereishit", "Vayikra", "Bemidbar", "Devarim"];
+ $('.textRef').autocomplete({
+              source: sefTitles
+            });
+            
 $('.blue').click(function() {
          var input = $('.textRef').val();
          google.script.run.findRef(input);
@@ -28,7 +38,11 @@ $('.blue').click(function() {
       }
    });
 $('.close').click(function() {
-         google.script.host.close();
+        
+    /*$.get("http://www.google.com/", function(jdata){
+        $('.suggestions').html(jdata);
+    });*/
+
+        // google.script.host.close();
      });
-</script>
 </script>
