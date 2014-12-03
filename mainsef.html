@@ -1,6 +1,11 @@
 <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons.css">
 <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/themes/smoothness/jquery-ui.css" />
+
 <style>
+body {
+
+overflow: hidden;
+}
 </style>
 <div class="block" id="button-bar">
       <button class="blue" id="run-sefaria">Insert Text</button>
@@ -9,40 +14,47 @@
       <button id="text-directory" style="float:right;">Show all Texts</button>
       </a>
     </div>
-<input type="text" class="textRef" style="width: 150px; margin-top: 20px;  width: 300px;" placeholder="Text">
+<input type="text" class="textRef disab" style="width: 150px; margin-top: 20px;  width: 300px;" placeholder="Text">
 <div class="sidebar bottom">
 
 <div class="suggestions">
+Loading...
 </div>
 
-  <span class="gray branding-text">Sefaria AddOn by <a href="http://www.github.com/shman/">Shlomi Helfgot</a></span>
+  <span class="gray branding-text">Sefaria AddOn by <a href="http://www.github.com/shman/">Shlomi Helfgot</a> &nbsp; </span>
 </div>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
 </script>
 <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
 
 <script>
-                  
-var sefTitles = ["Shemot", "Bereishit", "Vayikra", "Bemidbar", "Devarim"];
- $('.textRef').autocomplete({
-              source: sefTitles
-            });
-            
-$('.blue').click(function() {
+$(".textRef").attr("disabled",true);
+google.script.run.withSuccessHandler(function(respo) {
+    var sefTitles = [];
+    sefTitles=respo;
+     $(".textRef").removeAttr("disabled");
+    $('.suggestions').html(sefTitles[0]);
+    $('.textRef').autocomplete({
+              source: function( request, response ) {
+				var matches = $.map(sefTitles, function(tag) {
+						if ( tag.toUpperCase().indexOf(request.term.toUpperCase()) === 0 ) {
+							return tag;
+						}
+					});
+				response(matches);
+               }
+              });
+    $('.blue').click(function() {
          var input = $('.textRef').val();
          google.script.run.findRef(input);
      });
- $('.textRef').keyup(function(e) {
+     $('.textRef').keyup(function(e) {
       if (e.keyCode === 13) {
          $('.blue').click();
       }
    });
-$('.close').click(function() {
-        
-    /*$.get("http://www.google.com/", function(jdata){
-        $('.suggestions').html(jdata);
-    });*/
-
-        // google.script.host.close();
-     });
+   $('.close').click(function() {
+     google.script.host.close();
+  });
+  }).returnTitles();
 </script>
