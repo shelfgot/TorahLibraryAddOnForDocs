@@ -118,6 +118,14 @@ function sefariaSearch() {
             findRef(m["_source"]["ref"]);
          });}
 } 
+function returnTitles() {
+    var turl = 'http://www.sefaria.org/api/index/titles/';
+    var tresponse = UrlFetchApp.fetch(turl);
+    var tjson = tresponse.getContentText();
+    var tdata = JSON.parse(tjson);
+    var titleArray = tdata["books"];
+    return titleArray;
+}
           ///                                         //        \
         //////                                      \     \\\\\  \\\
       ///****//                                      \         \    \
