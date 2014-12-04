@@ -43,16 +43,19 @@ function findRef(ref, insert) {
           var emendedTextHe = "";
           var compLength = (typeof data.he === "string") ? 1 : data.he.length;
           for(var j = 0; j<compLength; j++) {
-            var jUrl = "http://hebrew.jdotjdot.com/encode?input="+parseInt(parseInt(j)+parseInt(pasukNum));
+            if(typeof data.he === "object") {
+              var jUrl = "http://hebrew.jdotjdot.com/encode?input="+parseInt(parseInt(j)+parseInt(pasukNum));
               var numResponse = UrlFetchApp.fetch(jUrl);
               var jdotNum = numResponse.getContentText();
-            if(typeof data.he === "array") {
               data.text[j] = "("+(j+parseInt(pasukNum))+")"+data.text[j]+"\r"; //add pasuk number
               data.he[j] = "("+jdotNum+")"+data.he[j]+"\n";
               emendedTextEn+= data.text[j];
               emendedTextHe+=data.he[j];
             }
-            else {
+            else if(typeof data.he === "string") {
+              var jUrl = "http://hebrew.jdotjdot.com/encode?input="+parseInt(parseInt(j)+parseInt(pasukNum));
+              var numResponse = UrlFetchApp.fetch(jUrl);
+              var jdotNum = numResponse.getContentText();
               data.text = "("+(j+parseInt(pasukNum))+")"+data.text+"\r"; //add pasuk number
               data.he = "("+jdotNum+")"+data.he+"\n";
               emendedTextEn+= data.text;
