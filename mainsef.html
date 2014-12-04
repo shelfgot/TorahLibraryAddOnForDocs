@@ -1,9 +1,7 @@
 <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons.css">
 <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/themes/smoothness/jquery-ui.css" />
-
 <style>
 body {
-
 overflow: hidden;
 }
 </style>
@@ -20,13 +18,11 @@ overflow: hidden;
 <div class="suggestions">
 Loading...
 </div>
-
-  <span class="gray branding-text">Sefaria AddOn by <a href="http://www.github.com/shman/">Shlomi Helfgot</a> &nbsp; </span>
+<span class="gray branding-text">Sefaria AddOn by <a href="http://www.github.com/shman/">Shlomi Helfgot</a> &nbsp; </span>
 </div>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
 </script>
 <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
-
 <script>
 $(".textRef").attr("disabled",true);
 google.script.run.withSuccessHandler(function(respo) {
@@ -46,12 +42,15 @@ google.script.run.withSuccessHandler(function(respo) {
               });
     $('.blue').click(function() {
          var input = $('.textRef').val();
-         google.script.run.findRef(input);
+         google.script.run.findRef(input, true);
      });
      $('.textRef').keyup(function(e) {
       if (e.keyCode === 13) {
          $('.blue').click();
       }
+         var preview = google.script.run.findRef($('.textref').val(), false);
+         $('.suggestions').html(preview.he);
+
    });
    $('.close').click(function() {
      google.script.host.close();
