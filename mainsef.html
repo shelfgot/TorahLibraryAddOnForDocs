@@ -13,11 +13,12 @@ overflow: hidden;
       </a>
     </div>
 <input type="text" class="textRef disab" style="width: 150px; margin-top: 20px;  width: 300px;" placeholder="Text">
-<div class="sidebar bottom">
-
 <div class="suggestions">
+<br>
 Loading...
 </div>
+<div class="sidebar bottom">
+
 <span class="gray branding-text">Sefaria AddOn by <a href="http://www.github.com/shman/">Shlomi Helfgot</a> &nbsp; </span>
 </div>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
@@ -29,7 +30,7 @@ google.script.run.withSuccessHandler(function(respo) {
     var sefTitles = [];
     sefTitles=respo;
      $(".textRef").removeAttr("disabled");
-    $('.suggestions').html(sefTitles[0]);
+    $('.suggestions').html("<br><b>Enter source title.</b>");
     $('.textRef').autocomplete({
               source: function( request, response ) {
 				var matches = $.map(sefTitles, function(tag) {
@@ -38,6 +39,9 @@ google.script.run.withSuccessHandler(function(respo) {
 						}
 					});
 				response(matches);
+               },
+               close: function() {
+               
                }
               });
     $('.blue').click(function() {
@@ -48,8 +52,6 @@ google.script.run.withSuccessHandler(function(respo) {
       if (e.keyCode === 13) {
          $('.blue').click();
       }
-         var preview = google.script.run.findRef($('.textref').val(), false);
-         $('.suggestions').html(preview.he);
 
    });
    $('.close').click(function() {
