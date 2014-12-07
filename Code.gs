@@ -9,22 +9,15 @@ function onOpen() {
       .addItem('About', 'aboutDialog')
       .addToUi();
 }
-function showGuide() {
-      var html = HtmlService.createHtmlOutputFromFile('transguide')
-          .setWidth(700)
-          .setHeight(400);
-      DocumentApp.getUi() 
-          .showModalDialog(html, 'Sefaria Transliteration Guidelines');
-}
 function aboutDialog() {
 
 }
 function sefariaHTML() {
  var sefGetHtml = HtmlService.createHtmlOutputFromFile('mainsef')
-          .setWidth(300)
-          .setHeight(500);
+          .setTitle('Insert a text from the Sefaria Library')
+          .setWidth(300);
       DocumentApp.getUi() 
-          .showModalDialog(sefGetHtml, 'Insert a text from the Sefaria Library');
+          .showSidebar(sefGetHtml);
 }
 function findRef(ref, insert) {
     var textSearchOr = ref;
@@ -52,7 +45,7 @@ function findRef(ref, insert) {
               emendedTextEn+= data.text[j];
               emendedTextHe+=data.he[j];
             }
-            else if(typeof data.he === "string") {
+            else if(typeof data.he === "string" && typeof data.he !== "undefined") {
               var jUrl = "http://hebrew.jdotjdot.com/encode?input="+parseInt(parseInt(j)+parseInt(pasukNum));
               var numResponse = UrlFetchApp.fetch(jUrl);
               var jdotNum = numResponse.getContentText();
@@ -64,7 +57,7 @@ function findRef(ref, insert) {
            };
            data.text = emendedTextEn;
            data.he = emendedTextHe;
-           emendedTextEn.replace(/(<(\D)>)([^<>])+(<\/(\D)>)/g, ""); //Strip html tags
+          // emendedTextEn.replace(/(<(\D)>)([^<>])+(<\/(\D)>)/gi, ""); //Strip html tags
            var numjUrl = "http://hebrew.jdotjdot.com/encode?input="+data.sections[0];
            var numnumResponse = UrlFetchApp.fetch(numjUrl);
            var perekNumero = numnumResponse.getContentText();
@@ -100,9 +93,8 @@ function sefariaSearch() {
           var searchJson = searchResponse.getContentText();
           var searchData = JSON.parse(searchJson);
           DocumentApp.getUi().alert(searchData["hits"]["total"]+" hits.");
-        
-         searchData["hits"]["hits"].forEach(function(m) {
-            findRef(m["_source"]["ref"]);
+          searchData["hits"]["hits"].forEach(function(m) {
+            findRef(m["_source"]["ref"], true);
          });}
 } 
 function returnTitles() {
