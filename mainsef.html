@@ -4,7 +4,7 @@
 </style>
 <div class="block" id="button-bar" style="margin-top: 15px;">
       <button class="blue" id="run-sefaria" style="margin-left: 10px;">Insert Text</button>
-      <select id="parshah" style="margin-left: 15px;">
+      <select class="parshah" style="margin-left: 12px;">
              <option value = "7"selected>Insert Aliyah</option>
              <option value = "0">Aliyah 1</option>
              <option value = "1">Aliyah 2</option>
@@ -54,8 +54,8 @@ google.script.run.withSuccessHandler(function(respo) {
     $('.blue').click(function() {
          var input = $('.textRef').val();
          google.script.run.findRef(input, true);
-         //var parshah = $('.parshah').val();
-         //google.script.run.parshaIn(parshah);
+         var parshah = $('.parshah').val();
+         google.script.run.parshaIn(parshah);
          
         });
      $('.textRef').keyup(function(e) {
