@@ -62,7 +62,8 @@ function findRef(ref, insert) {
            };
            data.text = emendedTextEn;
            data.he = emendedTextHe;
-          // emendedTextEn.replace(/(<(\D)>)([^<>])+(<\/(\D)>)/gi, ""); //Strip html tags
+           emendedTextEn.replace(/(<(\D)>)([^<>]+)(<\/(\D)>)/g, "$3");
+           emendedTextHe.replace(/(<(\D)>)([^<>]+)(<\/(\D)>)/g, "$3");
            var numjUrl = "http://hebrew.jdotjdot.com/encode?input="+data.sections[0];
            var numnumResponse = UrlFetchApp.fetch(numjUrl);
            var perekNumero = numnumResponse.getContentText();
