@@ -20,7 +20,12 @@ function sefariaHTML() {
           .showSidebar(sefGetHtml);
 }
 function findRef(ref, insert) {
-    var textSearchOr = ref;
+    if(ref == "") {
+       return;
+    }
+    else {
+       var textSearchOr = ref;
+    }
     var url = 'http://www.sefaria.org/api/texts/'
         +ref+"?commentary=0&context=0";
     var response = UrlFetchApp.fetch(url);
@@ -93,7 +98,8 @@ function sefariaSearch() {
           var searchJson = searchResponse.getContentText();
           var searchData = JSON.parse(searchJson);
           DocumentApp.getUi().alert(searchData["hits"]["total"]+" hits.");
-          searchData["hits"]["hits"].forEach(function(m) {
+        
+         searchData["hits"]["hits"].forEach(function(m) {
             findRef(m["_source"]["ref"], true);
          });}
 } 
@@ -104,6 +110,16 @@ function returnTitles() {
     var tdata = JSON.parse(tjson);
     var titleArray = tdata["books"];
     return titleArray;
+}
+function parshaIn(aliyah) {
+    if(aliyah == 7) {
+       return;
+    }
+    var purl = 'http://www.sefaria.org/api/texts/parashat_hashavua';
+    var presponse = UrlFetchApp.fetch(purl);
+    var pjson = presponse.getContentText();
+    var pdata = JSON.parse(pjson);
+     findRef(pdata.aliyot[aliyah], true);
 }
           ///                                         //        \
         //////                                      \     \\\\\  \\\
