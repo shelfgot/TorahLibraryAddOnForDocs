@@ -4,9 +4,19 @@
 </style>
 <div class="block" id="button-bar" style="margin-top: 15px;">
       <button class="blue" id="run-sefaria" style="margin-left: 10px;">Insert Text</button>
-      <button class="close" id="close" style="margin-left: 7%;">Close</button>
+      <select id="parshah" style="margin-left: 15px;">
+             <option value = "7"selected>Insert Aliyah</option>
+             <option value = "0">Aliyah 1</option>
+             <option value = "1">Aliyah 2</option>
+             <option value = "2">Aliyah 3</option>
+             <option value = "3">Aliyah 4</option>
+             <option value = "4">Aliyah 5</option>
+             <option value = "5">Aliyah 6</option>
+             <option value = "6">Aliyah 7</option>
+       </select>
+      
       <a href="http://www.sefaria.org/texts">
-      <button id="text-directory" style="float:right; margin-right: 10px;">Show Texts</button>
+      <button id="text-directory" style="float:right;">Show Texts</button>
       </a>
     </div>
 <input type="text" class="textRef disab" style="margin-top: 20px; margin-left: 10px; width: 280px;" placeholder="Text">
@@ -14,7 +24,7 @@
 <br>
 Loading...
 </div>
-<div class="sidebar bottom">
+<div class="sidebar bottom" style="position: fixed; background: white;">
 
 <span class="gray branding-text">Sefaria AddOn by <a href="http://www.github.com/shman/">Shlomi Helfgot</a> &nbsp; </span>
 </div>
@@ -44,12 +54,19 @@ google.script.run.withSuccessHandler(function(respo) {
     $('.blue').click(function() {
          var input = $('.textRef').val();
          google.script.run.findRef(input, true);
-     });
+         //var parshah = $('.parshah').val();
+         //google.script.run.parshaIn(parshah);
+         
+        });
      $('.textRef').keyup(function(e) {
+      var input = $('.textRef').val();
       if (e.keyCode === 13) {
          $('.blue').click();
       }
-
+          google.script.run.withSuccessHandler(function(txt) {
+            $('.suggestions').html("<table style='font-size: 3.5vw;'><tr><td>"+input+"</td><td>"+txt.heTitle+"</td></tr><tr><td>"+txt.text+"</td><td style='text-direction:rtl;'>"+txt.he+"</td></tr></table>");
+         }).findRef(input, false);
+      
    });
    $('.close').click(function() {
      google.script.host.close();
