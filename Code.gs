@@ -2,7 +2,6 @@ function onInstall() {
   onOpen();
 }
 function onOpen() {
-  // Add a menu with some items, some separators, and a sub-menu.
   DocumentApp.getUi().createAddonMenu()
       .addItem('Sefaria Library', 'sefariaHTML')
       .addItem('Search Sefaria', 'sefariaSearch')
@@ -89,20 +88,11 @@ function insertRef(data, title) {
            doc.appendTable(cells).setAttributes(tableStyle).getCell(1,1).insertParagraph(0, "").setLeftToRight(false).appendText(data.he);
 }
 function sefariaSearch() {
-      var result = DocumentApp.getUi().prompt('Search Sefaria',
-                                              'Enter phrase:', DocumentApp.getUi().ButtonSet.OK_CANCEL);
-       if (result.getSelectedButton() == DocumentApp.getUi().Button.OK) {
-          var textSearch = result.getResponseText();
-          var searchUrl = 'http://search.sefaria.org:9200/sefaria/_search?q='
-          +textSearch;
-          var searchResponse = UrlFetchApp.fetch(searchUrl);
-          var searchJson = searchResponse.getContentText();
-          var searchData = JSON.parse(searchJson);
-          DocumentApp.getUi().alert(searchData["hits"]["total"]+" hits.");
-        
-         searchData["hits"]["hits"].forEach(function(m) {
-            findRef(m["_source"]["ref"], true);
-         });}
+       var searchGetHtml = HtmlService.createHtmlOutputFromFile('searchpane')
+          .setTitle('Search Sefaria')
+          .setWidth(300);
+      DocumentApp.getUi() 
+          .showSidebar(searchGetHtml);
 } 
 function returnTitles() {
     var turl = 'http://www.sefaria.org/api/index/titles/';
@@ -122,6 +112,20 @@ function parshaIn(aliyah) {
     var pdata = JSON.parse(pjson);
      findRef(pdata.aliyot[aliyah], true);
 }
+function findSearch(inp) {
+    inp = inp || "לעולם";
+    var retdata = [];
+    var surl = 'http://search.sefaria.org:9200/sefaria/_search?q='+inp+'&size=100';
+    var sresponse = UrlFetchApp.fetch(surl);
+    var sjson = sresponse.getContentText();
+    var sdata = JSON.parse(sjson);
+  for(var n = 0; n<24; n++) {
+     retdata.push(sdata["hits"]["hits"][n]);
+  }
+   // Logger.log(retdata);
+    return retdata;
+  }
+
           ///                                         //        \
         //////                                      \     \\\\\  \\\
       ///****//                                      \         \    \
