@@ -56,20 +56,22 @@ google.script.run.withSuccessHandler(function(respo) {
          google.script.run.findRef(input, true);
          var parshah = $('.parshah').val();
          google.script.run.parshaIn(parshah);
-         
-        });
+         });
      $('.textRef').keyup(function(e) {
       var input = $('.textRef').val();
-      if (e.keyCode === 13) {
-         $('.blue').click();
-      }
-          google.script.run.withSuccessHandler(function(txt) {
+         if (e.keyCode === 13) {
+            $('.blue').click();
+         }
+         google.script.run.withSuccessHandler(function(txt) {
+            txt.heTitle = txt.heTitle || "לא מצאנו כלום בחפוש";
+            txt.text = txt.text || "";
+            txt.he = txt.he || "";
             $('.suggestions').html("<table style='font-size: 3.5vw;'><tr><td>"+input+"</td><td>"+txt.heTitle+"</td></tr><tr><td>"+txt.text+"</td><td style='text-direction:rtl;'>"+txt.he+"</td></tr></table>");
          }).findRef(input, false);
       
-   });
+      });
    $('.close').click(function() {
      google.script.host.close();
   });
-  }).returnTitles();
+}).returnTitles();
 </script>
