@@ -30,12 +30,13 @@ function findRef(ref, insert) {
     var response = UrlFetchApp.fetch(url);
     var json = response.getContentText();
     var data = JSON.parse(json);
-          if(data["sections"].length > 1) {
-              var pasukNum = data["sections"][1];
-          }
-          else {
-              var pasukNum = 1;
-          }
+    var pasukNum;
+      if(data["sections"][1] ) {
+              pasukNum = data["sections"][1];
+      }
+     else {
+        pasukNum = 1;
+     }
           var emendedTextEn = "";
           var emendedTextHe = "";
           var compLength = (typeof data.he === "string") ? 1 : data.he.length;
@@ -44,6 +45,12 @@ function findRef(ref, insert) {
               var jUrl = "http://hebrew.jdotjdot.com/encode?input="+parseInt(parseInt(j)+parseInt(pasukNum));
               var numResponse = UrlFetchApp.fetch(jUrl);
               var jdotNum = numResponse.getContentText();
+              if(typeof data.he[j] === "undefined") {
+                 data.he.push("לא מצאנו פסוק זה בעברית");
+              }
+              if(typeof data.text[j] === "undefined") {
+                 data.text.push("No English text found for this pasuk.");
+              }
               data.text[j] = "("+(j+parseInt(pasukNum))+")"+data.text[j]+"\r"; //add pasuk number
               data.he[j] = "("+jdotNum+")"+data.he[j]+"\n";
               emendedTextEn+= data.text[j];
@@ -61,11 +68,15 @@ function findRef(ref, insert) {
            };
            data.text = emendedTextEn;
            data.he = emendedTextHe;
-           emendedTextEn.replace(/(<(\D)>)([^<>]+)(<\/(\D)>)/g, "$3");
-           emendedTextHe.replace(/(<(\D)>)([^<>]+)(<\/(\D)>)/g, "$3");
-           var numjUrl = "http://hebrew.jdotjdot.com/encode?input="+data.sections[0];
-           var numnumResponse = UrlFetchApp.fetch(numjUrl);
-           var perekNumero = numnumResponse.getContentText();
+           var perekNumero;
+               if(data["sectionNames"][0] == "Daf") {
+                  perekNumero = "";
+               }
+               else {
+                 var numjUrl = "http://hebrew.jdotjdot.com/encode?input="+data.sections[0];
+                 var numnumResponse = UrlFetchApp.fetch(numjUrl);
+                 perekNumero = numnumResponse.getContentText();
+               }
            data.heTitle = data.heTitle +" "+ perekNumero;
            if(insert) {
               insertRef(data, textSearchOr);
@@ -75,6 +86,8 @@ function findRef(ref, insert) {
            }
 }
 function insertRef(data, title) {
+           data.text = data.text.replace(/(<(\D)>)([^<>]+)(<\/(\D)>)/g, "$3");
+           data.he = data.he.replace(/(<(\D)>)([^<>]+)(<\/(\D)>)/g, "$3");
            var cells = [
            [title, data.heTitle /*add perek num*/],
            [data.text, ""]
@@ -113,7 +126,6 @@ function parshaIn(aliyah) {
      findRef(pdata.aliyot[aliyah], true);
 }
 function findSearch(inp) {
-    inp = inp || "לעולם";
     var retdata = [];
     var surl = 'http://search.sefaria.org:9200/sefaria/_search?q='+inp+'&size=100';
     var sresponse = UrlFetchApp.fetch(surl);
