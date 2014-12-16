@@ -5,11 +5,8 @@ function onOpen() {
   DocumentApp.getUi().createAddonMenu()
       .addItem('Sefaria Library', 'sefariaHTML')
       .addItem('Search Sefaria', 'sefariaSearch')
-      .addItem('About', 'aboutDialog')
+      .addItem('Make Bibliography','bibMaker')
       .addToUi();
-}
-function aboutDialog() {
-
 }
 function sefariaHTML() {
  var sefGetHtml = HtmlService.createHtmlOutputFromFile('mainsef')
@@ -97,6 +94,7 @@ function insertRef(data, title) {
                 DocumentApp.FontFamily.TIMES_NEW_ROMAN;
                tableStyle[DocumentApp.Attribute.FONT_SIZE] =
                 12;
+               tableStyle[DocumentApp.Attribute.BOLD] = false;
            var doc = DocumentApp.getActiveDocument().getBody();
            doc.appendTable(cells).setAttributes(tableStyle).getCell(1,1).insertParagraph(0, "").setLeftToRight(false).appendText(data.he);
 }
@@ -123,6 +121,10 @@ function parshaIn(aliyah) {
     var presponse = UrlFetchApp.fetch(purl);
     var pjson = presponse.getContentText();
     var pdata = JSON.parse(pjson);
+    if(aliyah == "haf") {
+        findRef(pdata.haftara[0], true);
+        return;
+     }
      findRef(pdata.aliyot[aliyah], true);
 }
 function findSearch(inp) {
@@ -134,9 +136,29 @@ function findSearch(inp) {
   for(var n = 0; n<24; n++) {
      retdata.push(sdata["hits"]["hits"][n]);
   }
-   // Logger.log(retdata);
     return retdata;
   }
+function bibMaker() {
+   DocumentApp.getUi().alert("This will add a bibliography to the bottom of the page with all the sources that Sefaria can find in your Document.");
+   var doc = DocumentApp.getActiveDocument().getBody();
+  var bibAttr = {};
+          bibAttr[DocumentApp.Attribute.FONT_FAMILY] =
+                DocumentApp.FontFamily.CALIBRI;
+          bibAttr[DocumentApp.Attribute.FONT_SIZE] =
+                20;
+          bibAttr[DocumentApp.Attribute.BOLD] =
+                true;
+   doc.appendParagraph("Bibliography:").setAttributes(bibAttr);
+  var text = doc.editAsText().getText();
+  var titleList = returnTitles();
+  titleList = titleList.join("|");
+  var reg = "("+titleList+")"+" \\d+[ab]?(:\\d+)?";
+  var regexpr = new RegExp(reg, "gi");	
+  var regarr = text.match(regexpr);
+  for(var bib = 0; bib < regarr.length; bib++) {
+    findRef(regarr[bib], true);
+  }
+}
 
           ///                                         //        \
         //////                                      \     \\\\\  \\\
