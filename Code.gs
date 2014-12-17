@@ -28,7 +28,7 @@ function findRef(ref, insert) {
     var json = response.getContentText();
     var data = JSON.parse(json);
     var pasukNum;
-      if(data["sections"][1] ) {
+      if(data["sections"][1]) {
               pasukNum = data["sections"][1];
       }
      else {
@@ -148,15 +148,33 @@ function bibMaker() {
                 20;
           bibAttr[DocumentApp.Attribute.BOLD] =
                 true;
-   doc.appendParagraph("Bibliography:").setAttributes(bibAttr);
   var text = doc.editAsText().getText();
   var titleList = returnTitles();
   titleList = titleList.join("|");
-  var reg = "("+titleList+")"+" \\d+[ab]?(:\\d+)?";
+  var reg = "("+titleList+")? \\d+[ab]?(:\\d+(-\\d+)?)?"; //add better " " to tlist
   var regexpr = new RegExp(reg, "gi");	
   var regarr = text.match(regexpr);
+  doc.appendParagraph("Bibliography:").setAttributes(bibAttr);
+  function recFind(src, arr, re) {
+    if(re.test(arr[src])) {
+       var val = arr[src].split(" ");
+       val.pop();
+       return val.join(" ");
+    }
+    else {
+       return recFind(src-1, arr, re);
+    }
+  }
   for(var bib = 0; bib < regarr.length; bib++) {
-    findRef(regarr[bib], true);
+    var regsp = /[a-z]/i;
+    if (regsp.test(regarr[bib])) {
+      findRef(regarr[bib], true);
+    }
+    else {
+       regarr[bib] = recFind(bib, regarr, regsp)+" "+regarr[bib];
+      regarr[bib] = regarr[bib].replace(/\s+/, " ");
+      findRef(regarr[bib], true);
+    }
   }
 }
 
