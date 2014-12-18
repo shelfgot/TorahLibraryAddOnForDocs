@@ -1,12 +1,13 @@
 <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons.css">
 <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/themes/smoothness/jquery-ui.css" />
+<script src="https://raw.githubusercontent.com/shman/Files/master/keyboard.js"></script>
 <style>
 .clickme:hover {
   cursor: pointer;
   background: rgba(122, 122, 122, 0.5);
 }
 </style>
-<input type="text" class="textRef disab" style="margin-top: 20px; margin-left: 10px; width: 280px;" placeholder="Search Text">
+<input type="text" class="textRef keyboardInput" style="margin-top: 20px; margin-left: 10px; width: 280px;" placeholder="Search Text">
 <div class="suggestions" style="margin-left: 10px;">
 <br>
 
@@ -26,10 +27,12 @@
             for (var i=0; i<txtsrch.length; i++) {          
                   $('.suggestions').append("<div style='font-size: 2.5vh;' class='clickme'><h3 class='bt'>"+txtsrch[i]["_source"]["ref"]+"</h3>"+"<p>"+txtsrch[i]["_source"]["content"]+"</p></div>");
                }
-         }).findSearch(input);
-      });
-      $('.clickme').on('click', function() {
+            $('.clickme').click(function() {
                   var bookTitle = $(this).children('.bt').text();
                   google.script.run.findRef(bookTitle, true);
+                 
            });
+         }).findSearch(input);
+      });
+      
 </script>
