@@ -13,6 +13,7 @@
              <option value = "4">Aliyah 5</option>
              <option value = "5">Aliyah 6</option>
              <option value = "6">Aliyah 7</option>
+             <option value = "haf">Haftara</option>
        </select>
       
       <a href="http://www.sefaria.org/texts">
@@ -46,9 +47,6 @@ google.script.run.withSuccessHandler(function(respo) {
 						}
 					});
 				response(matches);
-               },
-               close: function() {
-               
                }
               });
     $('.blue').click(function() {
@@ -62,14 +60,20 @@ google.script.run.withSuccessHandler(function(respo) {
          if (e.keyCode === 13) {
             $('.blue').click();
          }
+         if(/\d/.test(input)) {
          google.script.run.withSuccessHandler(function(txt) {
             txt.heTitle = txt.heTitle || "לא מצאנו כלום בחפוש";
             txt.text = txt.text || "";
             txt.he = txt.he || "";
-            $('.suggestions').html("<table style='font-size: 3.5vw;'><tr><td>"+input+"</td><td>"+txt.heTitle+"</td></tr><tr><td>"+txt.text+"</td><td style='text-direction:rtl;'>"+txt.he+"</td></tr></table>");
+            $('.suggestions').html("<table style='font-size: 3.5vw;'><tr><td>"+input+"</td><td>"+txt.heTitle+"</td></tr><tr><td style='padding-top: -2% !important;'>"+txt.text+"</td><td style='text-direction:rtl;'>"+txt.he+"</td></tr></table>");
          }).findRef(input, false);
-      
-      });
+        }
+        else {
+                  google.script.run.withSuccessHandler(function(txt) {
+                        $('.suggestions').html("<br><b>Enter "+txt["sectionNames"][0]+" and optionally a "+txt["sectionNames"][1]+". Specify a range with '-'.</b>");
+                    }).findRef(input, false);
+        }
+   });
    $('.close').click(function() {
      google.script.host.close();
   });
