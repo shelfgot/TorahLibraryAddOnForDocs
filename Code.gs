@@ -84,7 +84,7 @@ function findRef(ref, insert) {
 }
 function insertRef(data, title) {
            data.text = data.text.replace(/(<(\D)>)([^<>]+)(<\/(\D)>)/g, "$3");
-           data.he = data.he.replace(/(<(\D)>)([^<>]+)(<\/(\D)>)/g, "$3");
+           data.he = data.he.replace(/(<(\D)>)([^<>]+)(<\/(\D)>)/g, "$3"); //stopgap solution for now.
            var cells = [
            [title, data.heTitle /*add perek num*/],
            [data.text, ""]
@@ -133,8 +133,10 @@ function findSearch(inp) {
     var sresponse = UrlFetchApp.fetch(surl);
     var sjson = sresponse.getContentText();
     var sdata = JSON.parse(sjson);
-  for(var n = 0; n<24; n++) {
+  for(var n = 0; n<100; n++) {
+    if(sdata["hits"]["hits"][n]["_type"] == "text") {
      retdata.push(sdata["hits"]["hits"][n]);
+    }
   }
     return retdata;
   }
@@ -151,9 +153,10 @@ function bibMaker() {
   var text = doc.editAsText().getText();
   var titleList = returnTitles();
   titleList = titleList.join("|");
-  var reg = "("+titleList+")? \\d+[ab]?(:\\d+(-\\d+)?)?"; //add better " " to tlist
+  var reg = "("+titleList+" )?( )?\\d+[ab]?(:\\d+(-\\d+)?)?"; //add better " " to tlist
   var regexpr = new RegExp(reg, "gi");	
   var regarr = text.match(regexpr);
+  DocumentApp.getUi().alert(regarr);
   doc.appendParagraph("Bibliography:").setAttributes(bibAttr);
   function recFind(src, arr, re) {
     if(re.test(arr[src])) {
@@ -171,7 +174,7 @@ function bibMaker() {
       findRef(regarr[bib], true);
     }
     else {
-       regarr[bib] = recFind(bib, regarr, regsp)+" "+regarr[bib];
+      regarr[bib] = recFind(bib, regarr, regsp)+" "+regarr[bib];
       regarr[bib] = regarr[bib].replace(/\s+/, " ");
       findRef(regarr[bib], true);
     }
@@ -181,7 +184,7 @@ function bibMaker() {
           ///                                         //        \
         //////                                      \     \\\\\  \\\
       ///****//                                      \         \    \
-    ////*///////                                      \     \   \    \          
+    ///////*////                                      \     \   \    \          
      //****///          
       //////
        ///
