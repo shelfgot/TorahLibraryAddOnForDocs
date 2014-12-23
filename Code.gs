@@ -3,14 +3,14 @@ function onInstall() {
 }
 function onOpen() {
   DocumentApp.getUi().createAddonMenu()
-      .addItem('Sefaria Library', 'sefariaHTML')
-      .addItem('Search Sefaria', 'sefariaSearch')
-      .addItem('Make Bibliography','bibMaker')
+      .addItem('Insert Source', 'sefariaHTML')
+      .addItem('Search Texts', 'sefariaSearch')
+  .addItem('Cite Sources','bibMaker')
       .addToUi();
 }
 function sefariaHTML() {
  var sefGetHtml = HtmlService.createHtmlOutputFromFile('mainsef')
-          .setTitle('Insert a text from the Sefaria Library')
+ .setTitle('Insert Source')
           .setWidth(300);
       DocumentApp.getUi() 
           .showSidebar(sefGetHtml);
@@ -100,7 +100,7 @@ function insertRef(data, title) {
 }
 function sefariaSearch() {
        var searchGetHtml = HtmlService.createHtmlOutputFromFile('searchpane')
-          .setTitle('Search Sefaria')
+          .setTitle('Search All Texts')
           .setWidth(300);
       DocumentApp.getUi() 
           .showSidebar(searchGetHtml);
@@ -113,35 +113,32 @@ function returnTitles() {
     var titleArray = tdata["books"];
     return titleArray;
 }
-function parshaIn(aliyah) {
-    if(aliyah == 7) {
-       return;
-    }
+function returnParsha(aliyah) {
     var purl = 'http://www.sefaria.org/api/texts/parashat_hashavua';
     var presponse = UrlFetchApp.fetch(purl);
     var pjson = presponse.getContentText();
     var pdata = JSON.parse(pjson);
     if(aliyah == "haf") {
-        findRef(pdata.haftara[0], true);
-        return;
+        return pdata.haftara[0];
      }
-     findRef(pdata.aliyot[aliyah], true);
+     return pdata.aliyot[aliyah];
 }
 function findSearch(inp) {
+    inp = inp || "במחבואה נחביתי";
     var retdata = [];
-    var surl = 'http://search.sefaria.org:9200/sefaria/_search?q='+inp+'&size=100';
+    var surl = 'http://d1.sefaria.org:9200/sefaria/_search?q='+inp+'&size=100';
     var sresponse = UrlFetchApp.fetch(surl);
     var sjson = sresponse.getContentText();
     var sdata = JSON.parse(sjson);
-  for(var n = 0; n<100; n++) {
-    if(sdata["hits"]["hits"][n]["_type"] == "text") {
-     retdata.push(sdata["hits"]["hits"][n]);
-    }
-  }
+      for(var n = 0; n<100; n++) {
+          if(sdata["hits"]["hits"][n]["_type"] == "text") {
+          retdata.push(sdata["hits"]["hits"][n]);
+      }
+     }
     return retdata;
   }
 function bibMaker() {
-   DocumentApp.getUi().alert("This will add a bibliography to the bottom of the page with all the sources that Sefaria can find in your Document.");
+   DocumentApp.getUi().alert("Add a \"Sources Cited\" section to the bottom of the page with all the sources that Sefaria can find cited in your Document.");
    var doc = DocumentApp.getActiveDocument().getBody();
   var bibAttr = {};
           bibAttr[DocumentApp.Attribute.FONT_FAMILY] =
@@ -156,8 +153,7 @@ function bibMaker() {
   var reg = "("+titleList+" )?( )?\\d+[ab]?(:\\d+(-\\d+)?)?"; //add better " " to tlist
   var regexpr = new RegExp(reg, "gi");	
   var regarr = text.match(regexpr);
-  DocumentApp.getUi().alert(regarr);
-  doc.appendParagraph("Bibliography:").setAttributes(bibAttr);
+  doc.appendParagraph("Sources Cited:").setAttributes(bibAttr);
   function recFind(src, arr, re) {
     if(re.test(arr[src])) {
        var val = arr[src].split(" ");
