@@ -8,7 +8,7 @@
 }
 </style>
 <input type="text" class="textRef keyboardInput" style="margin-top: 20px; margin-left: 10px; width: 280px;" placeholder="Search Text">
-<div class="suggestions" style="margin-left: 10px;">
+<div class="suggestions" style="margin-left: 10px; overflow-y: scroll; overflow-x: hidden; min-height: 0px; height: 73.5vh;">
 <br>
 
 </div>
@@ -19,13 +19,29 @@
 </script>
 <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
 <script>
-    $('.suggestions').html("<br><b>Enter search.</b>");
+    $('.suggestions').html("<br><b>Search Sefaria for a phrase, in Hebrew or in English.</b>");
      $('.textRef').keyup(function(e) {
       var input = $('.textRef').val();
                   $('.suggestions').html('');
           google.script.run.withSuccessHandler(function(txtsrch) {
-            for (var i=0; i<txtsrch.length; i++) {          
-                  $('.suggestions').append("<div style='font-size: 2.5vh;' class='clickme'><h3 class='bt'>"+txtsrch[i]["_source"]["ref"]+"</h3>"+"<p>"+txtsrch[i]["_source"]["content"]+"</p></div>");
+            function stripTaam(text){
+               var hebString = text.replace(/[\u0591-\u05C7]/g,"");
+		       return hebString;
+            } //Thank you Russell Neiss!
+            var input = $('.textRef').val();
+            var re;
+                  if(input.indexOf(" ") < 0) {
+                    re = new RegExp("("+input+")", "gi");
+                  }
+                  else {
+                     input = input.split(" ");
+                     input = input.join("|");
+                     re = new RegExp("("+input+")", "gi");
+                  }
+            for (var i=0; i<txtsrch.length; i++) {  
+                  txtsrch[i]["_source"]["content"] = stripTaam(txtsrch[i]["_source"]["content"]);
+                  txtsrch[i]["_source"]["content"] = txtsrch[i]["_source"]["content"].replace(re, "<b style='font-size: 4vw;'>$1</b>");
+                  $('.suggestions').append("<div class='clickme'><h3 class='bt'  style='font-size: 6vw; line-height: 6vw;'>"+txtsrch[i]["_source"]["ref"]+"</h3>"+"<p>"+txtsrch[i]["_source"]["content"]+"</p></div>");
                }
             $('.clickme').click(function() {
                   var bookTitle = $(this).children('.bt').text();
