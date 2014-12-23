@@ -1,29 +1,27 @@
 <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons.css">
 <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/themes/smoothness/jquery-ui.css" />
 <style>
+#button-bar {
+   font-size: 3.8vw !important;
+}
+.ui-autocomplete {
+height: 33vh;
+width: 175px !important;
+overflow-y: scroll;
+}
 </style>
-<div class="block" id="button-bar" style="margin-top: 15px;">
-      <button class="blue" id="run-sefaria" style="margin-left: 10px;">Insert Text</button>
-      <select class="parshah" style="margin-left: 12px;">
-             <option value = "7"selected>Insert Aliyah</option>
-             <option value = "0">Aliyah 1</option>
-             <option value = "1">Aliyah 2</option>
-             <option value = "2">Aliyah 3</option>
-             <option value = "3">Aliyah 4</option>
-             <option value = "4">Aliyah 5</option>
-             <option value = "5">Aliyah 6</option>
-             <option value = "6">Aliyah 7</option>
-             <option value = "haf">Haftara</option>
-       </select>
-      
-      <a href="http://www.sefaria.org/texts">
-      <button id="text-directory" style="float:right;">Show Texts</button>
-      </a>
-    </div>
-<input type="text" class="textRef disab" style="margin-top: 20px; margin-left: 10px; width: 280px;" placeholder="Text">
-<div class="suggestions" style="margin-left: 10px;">
-<br>
-Loading...
+<button class="a red" data="1" style="font-size: 2.5vw; min-width: 0px; width: 50px;margin-top: 10px; margin-left: 10px; margin-right: 5px;">Aliyah: 1</button>
+<button class="a red" data="2" style="font-size: 2.5vw; min-width: 0px; width: 1.4vw;margin-top: 10px; margin-left: 0px; margin-right: 5px;">2</button>
+<button class="a red" data="3" style="font-size: 2.5vw; min-width: 0px; width: 1.4vw;margin-top: 10px; margin-left: 0px;margin-right: 5px;">3</button>
+<button class="a red" data="4" style="font-size: 2.5vw; min-width: 0px; width: 1.4vw;margin-top: 10px; margin-left: 0px;margin-right: 5px;">4</button>
+<button class="a red" data="5" style="font-size: 2.5vw; min-width: 0px; width: 1.4vw;margin-top: 10px; margin-left: 0px;margin-right: 5px;">5</button>
+<button class="a red" data="6" style="font-size: 2.5vw; min-width: 0px; width: 1.4vw;margin-top: 10px;margin-left: 0px; margin-right: 5px;">6</button>
+<button class="a red" data="7" style="font-size: 2.5vw; min-width: 0px; width: 1.4vw;margin-top: 10px; margin-left: 0px;margin-right: 5px;">7</button>
+<button class="a red" data="haf" style="font-size: 2.5vw; min-width: 0px; width: 59px; margin-top: 10px; margin-left: 0px;margin-right: 5px;">Haftara</button>
+<input type="text" class="textRef disab" style="margin-top: 10px; margin-left: 10px; width: 180px; display: inline; float: left; height: 5.3vh;" placeholder="Text Title:">
+<button class="blue" id="run-sefaria" style="font-size: 3.8vw; margin-right: 10px; display: inline; float: right; margin-top: 10px; width: 30vw !important; height: 5.3vh !important;">Insert Source</button>
+<div class="suggestions" style="margin-left: 10px; margin-right: 10px; margin-top: 50px; min-height: 0px; height: 70vh !important; overflow-y: scroll;">
+<b><img src="http://www.sefaria.org/static/img/ajax-loader.gif"></b>
 </div>
 <div class="sidebar bottom" style="position: fixed; background: white;">
 
@@ -38,7 +36,7 @@ google.script.run.withSuccessHandler(function(respo) {
     var sefTitles = [];
     sefTitles=respo;
      $(".textRef").removeAttr("disabled");
-    $('.suggestions').html("<br><b>Enter source title.</b>");
+    $('.suggestions').html("<b>Enter the title of the text.</b>");
     $('.textRef').autocomplete({
               source: function( request, response ) {
 				var matches = $.map(sefTitles, function(tag) {
@@ -47,19 +45,22 @@ google.script.run.withSuccessHandler(function(respo) {
 						}
 					});
 				response(matches);
-               }
-              });
+               },
+               open: function() { 
+                         $('.textRef').autocomplete("widget").width(280);
+                     }  
+               });
+    $('.a').click(function() {
+         google.script.run.withSuccessHandler(function(referenk) {
+            $('.textRef').val(referenk);
+         }).returnParsha($(this).attr("data"));
+    });
     $('.blue').click(function() {
          var input = $('.textRef').val();
          google.script.run.findRef(input, true);
-         var parshah = $('.parshah').val();
-         google.script.run.parshaIn(parshah);
          });
      $('.textRef').keyup(function(e) {
       var input = $('.textRef').val();
-         if (e.keyCode === 13) {
-            $('.blue').click();
-         }
          if(/\d/.test(input)) {
          google.script.run.withSuccessHandler(function(txt) {
             txt.heTitle = txt.heTitle || "לא מצאנו כלום בחפוש";
@@ -79,3 +80,4 @@ google.script.run.withSuccessHandler(function(respo) {
   });
 }).returnTitles();
 </script>
+
