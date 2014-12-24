@@ -16,6 +16,8 @@ function sefariaHTML() {
           .showSidebar(sefGetHtml);
 }
 function findRef(ref, insert) {
+    ref = "Talmud Yoma 20b";
+    insert = true;
     if(ref == "") {
        return;
     }
@@ -28,25 +30,38 @@ function findRef(ref, insert) {
     var json = response.getContentText();
     var data = JSON.parse(json);
     var pasukNum;
-      if(data["sections"][1]) {
+    if(data["sections"][1]) {
               pasukNum = data["sections"][1];
-      }
-     else {
+    }
+    else {
         pasukNum = 1;
-     }
-          var emendedTextEn = "";
-          var emendedTextHe = "";
-          var compLength = (typeof data.he === "string") ? 1 : data.he.length;
+    }
+        var emendedTextEn = "";
+        var emendedTextHe = "";
+        var compLength = (typeof data.he === "string") ? 1 : data.he.length;
+        data.text = data.text || new data.he.constructor;
+        data.he = data.he || new data.he.constructor;
+        if(!data["spanning"]) {
           for(var j = 0; j<compLength; j++) {
             if(typeof data.he === "object") {
               var jUrl = "http://hebrew.jdotjdot.com/encode?input="+parseInt(parseInt(j)+parseInt(pasukNum));
               var numResponse = UrlFetchApp.fetch(jUrl);
               var jdotNum = numResponse.getContentText();
               if(typeof data.he[j] === "undefined") {
-                 data.he.push("לא מצאנו פסוק זה בעברית");
+                 if (typeof data.he === "object") {
+                   data.he.push("לא מצאנו פסוק זה בעברית");
+                 }
+                 else {
+                   data.he = "לא מצאנו פסוק זה בעברית";
+                 }
               }
               if(typeof data.text[j] === "undefined") {
-                 data.text.push("No English text found for this pasuk.");
+                if (typeof data.he === "object") {
+                 data.text.push("No English text found for this verse.");
+                }
+                else {
+                 data.text = "No English text found for this verse.";
+                }
               }
               data.text[j] = "("+(j+parseInt(pasukNum))+")"+data.text[j]+"\r"; //add pasuk number
               data.he[j] = "("+jdotNum+")"+data.he[j]+"\n";
@@ -63,6 +78,27 @@ function findRef(ref, insert) {
               emendedTextHe+=data.he;
             }
            };
+        }
+        else {
+            for(var n = 0; n<compLength; n++) {
+              for(var q = 0; q<data.he[n].length; q++) {
+                 pasukNum = (n==0) ? pasukNum : 1;
+                 var jUrl = "http://hebrew.jdotjdot.com/encode?input="+parseInt(parseInt(q)+parseInt(pasukNum));
+                 var numResponse = UrlFetchApp.fetch(jUrl);
+                 var jdotNum = numResponse.getContentText();
+                 data.text[n][q] = "("+(q+parseInt(pasukNum))+")"+data.text[n][q]+"\r"; //add pasuk number
+                 data.he[n][q] = "("+jdotNum+")"+data.he[n][q]+"\n";
+                 if(typeof data.he[n][q] === "undefined") {
+                   data.he[n].push("לא מצאנו פסוק זה בעברית");
+                 }
+                 if(typeof data.text[n][q] === "undefined") {
+                   data.text[n].push("No English text found for this pasuk.");
+                 }
+                 emendedTextEn+= data.text[n][q];
+                 emendedTextHe+=data.he[n][q];
+              }
+            }
+        }
            data.text = emendedTextEn;
            data.he = emendedTextHe;
            var perekNumero;
@@ -75,7 +111,7 @@ function findRef(ref, insert) {
                  perekNumero = numnumResponse.getContentText();
                }
            data.heTitle = data.heTitle +" "+ perekNumero;
-           if(insert) {
+          if(insert) {
               insertRef(data, textSearchOr);
            }
            else {
@@ -83,10 +119,11 @@ function findRef(ref, insert) {
            }
 }
 function insertRef(data, title) {
+           var doc = DocumentApp.getActiveDocument().getBody();
            data.text = data.text.replace(/(<(\D)>)([^<>]+)(<\/(\D)>)/g, "$3");
            data.he = data.he.replace(/(<(\D)>)([^<>]+)(<\/(\D)>)/g, "$3"); //stopgap solution for now.
            var cells = [
-           [title, data.heTitle /*add perek num*/],
+           [title, data.heTitle],
            [data.text, ""]
            ];
            var tableStyle = {};
@@ -95,7 +132,6 @@ function insertRef(data, title) {
                tableStyle[DocumentApp.Attribute.FONT_SIZE] =
                 12;
                tableStyle[DocumentApp.Attribute.BOLD] = false;
-           var doc = DocumentApp.getActiveDocument().getBody();
            doc.appendTable(cells).setAttributes(tableStyle).getCell(1,1).insertParagraph(0, "").setLeftToRight(false).appendText(data.he);
 }
 function sefariaSearch() {
@@ -124,13 +160,14 @@ function returnParsha(aliyah) {
      return pdata.aliyot[aliyah];
 }
 function findSearch(inp) {
-    inp = inp || "במחבואה נחביתי";
     var retdata = [];
     var surl = 'http://d1.sefaria.org:9200/sefaria/_search?q='+inp+'&size=100';
     var sresponse = UrlFetchApp.fetch(surl);
     var sjson = sresponse.getContentText();
     var sdata = JSON.parse(sjson);
+    var repetitiveArray = [];
       for(var n = 0; n<100; n++) {
+          repetitiveArray.push(sdata["hits"]["hits"][n]["_source"]["ref"]);
           if(sdata["hits"]["hits"][n]["_type"] == "text") {
           retdata.push(sdata["hits"]["hits"][n]);
       }
@@ -153,6 +190,10 @@ function bibMaker() {
   var reg = "("+titleList+" )?( )?\\d+[ab]?(:\\d+(-\\d+)?)?"; //add better " " to tlist
   var regexpr = new RegExp(reg, "gi");	
   var regarr = text.match(regexpr);
+  if(!regarr) {
+    DocumentApp.getUi().alert("Uh-oh...", "You have no sources in your Doc!", DocumentApp.getUi().ButtonSet.OK_CANCEL); 
+    return;
+  }
   doc.appendParagraph("Sources Cited:").setAttributes(bibAttr);
   function recFind(src, arr, re) {
     if(re.test(arr[src])) {
