@@ -53,6 +53,7 @@ google.script.run.withSuccessHandler(function(respo) {
     $('.a').click(function() {
          google.script.run.withSuccessHandler(function(referenk) {
             $('.textRef').val(referenk);
+            $('.textRef').keyup();
          }).returnParsha($(this).attr("data"));
     });
     $('.blue').click(function() {
@@ -66,7 +67,7 @@ google.script.run.withSuccessHandler(function(respo) {
             txt.heTitle = txt.heTitle || "לא מצאנו כלום בחפוש";
             txt.text = txt.text || "";
             txt.he = txt.he || "";
-            $('.suggestions').html("<table style='font-size: 3.5vw;'><tr><td>"+input+"</td><td>"+txt.heTitle+"</td></tr><tr><td style='padding-top: -2% !important;'>"+txt.text+"</td><td style='text-direction:rtl;'>"+txt.he+"</td></tr></table>");
+            $('.suggestions').html("<table style='font-size: 3.5vw;'><tr><td>"+input+"</td><td>"+txt.heTitle+"</td></tr><tr><td style='padding-top: -2% !important;'>"+txt.text+"</td><td style='direction:rtl;'>"+txt.he+"</td></tr></table>");
          }).findRef(input, false);
         }
         else {
