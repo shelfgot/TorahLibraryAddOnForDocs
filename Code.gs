@@ -5,9 +5,9 @@ function onOpen() {
   DocumentApp.getUi().createAddonMenu()
       .addItem('Insert Source', 'sefariaHTML')
       .addItem('Search Texts', 'sefariaSearch')
-  .addItem('Cite Sources','bibMaker')
       .addToUi();
 }
+
 function sefariaHTML() {
  var sefGetHtml = HtmlService.createHtmlOutputFromFile('mainsef')
  .setTitle('Insert Source')
@@ -15,125 +15,128 @@ function sefariaHTML() {
       DocumentApp.getUi() 
           .showSidebar(sefGetHtml);
 }
-function findRef(ref, insert) {
-    ref = "Talmud Yoma 20b";
-    insert = true;
-    if(ref == "") {
-       return;
-    }
-    else {
-       var textSearchOr = ref;
-    }
-    var url = 'http://www.sefaria.org/api/texts/'
-        +ref+"?commentary=0&context=0";
-    var response = UrlFetchApp.fetch(url);
-    var json = response.getContentText();
-    var data = JSON.parse(json);
-    var pasukNum;
-    if(data["sections"][1]) {
-              pasukNum = data["sections"][1];
-    }
-    else {
-        pasukNum = 1;
-    }
-        var emendedTextEn = "";
-        var emendedTextHe = "";
-        var compLength = (typeof data.he === "string") ? 1 : data.he.length;
-        data.text = data.text || new data.he.constructor;
-        data.he = data.he || new data.he.constructor;
-        if(!data["spanning"]) {
-          for(var j = 0; j<compLength; j++) {
-            if(typeof data.he === "object") {
-              var jUrl = "http://hebrew.jdotjdot.com/encode?input="+parseInt(parseInt(j)+parseInt(pasukNum));
-              var numResponse = UrlFetchApp.fetch(jUrl);
-              var jdotNum = numResponse.getContentText();
-              if(typeof data.he[j] === "undefined") {
-                 if (typeof data.he === "object") {
-                   data.he.push("לא מצאנו פסוק זה בעברית");
-                 }
-                 else {
-                   data.he = "לא מצאנו פסוק זה בעברית";
-                 }
-              }
-              if(typeof data.text[j] === "undefined") {
-                if (typeof data.he === "object") {
-                 data.text.push("No English text found for this verse.");
-                }
-                else {
-                 data.text = "No English text found for this verse.";
-                }
-              }
-              data.text[j] = "("+(j+parseInt(pasukNum))+")"+data.text[j]+"\r"; //add pasuk number
-              data.he[j] = "("+jdotNum+")"+data.he[j]+"\n";
-              emendedTextEn+= data.text[j];
-              emendedTextHe+=data.he[j];
-            }
-            else if(typeof data.he === "string" && typeof data.he !== "undefined") {
-              var jUrl = "http://hebrew.jdotjdot.com/encode?input="+parseInt(parseInt(j)+parseInt(pasukNum));
-              var numResponse = UrlFetchApp.fetch(jUrl);
-              var jdotNum = numResponse.getContentText();
-              data.text = "("+(j+parseInt(pasukNum))+")"+data.text+"\r"; //add pasuk number
-              data.he = "("+jdotNum+")"+data.he+"\n";
-              emendedTextEn+= data.text;
-              emendedTextHe+=data.he;
-            }
-           };
-        }
-        else {
-            for(var n = 0; n<compLength; n++) {
-              for(var q = 0; q<data.he[n].length; q++) {
-                 pasukNum = (n==0) ? pasukNum : 1;
-                 var jUrl = "http://hebrew.jdotjdot.com/encode?input="+parseInt(parseInt(q)+parseInt(pasukNum));
-                 var numResponse = UrlFetchApp.fetch(jUrl);
-                 var jdotNum = numResponse.getContentText();
-                 data.text[n][q] = "("+(q+parseInt(pasukNum))+")"+data.text[n][q]+"\r"; //add pasuk number
-                 data.he[n][q] = "("+jdotNum+")"+data.he[n][q]+"\n";
-                 if(typeof data.he[n][q] === "undefined") {
-                   data.he[n].push("לא מצאנו פסוק זה בעברית");
-                 }
-                 if(typeof data.text[n][q] === "undefined") {
-                   data.text[n].push("No English text found for this pasuk.");
-                 }
-                 emendedTextEn+= data.text[n][q];
-                 emendedTextHe+=data.he[n][q];
-              }
-            }
-        }
-           data.text = emendedTextEn;
-           data.he = emendedTextHe;
-           var perekNumero;
-               if(data["sectionNames"][0] == "Daf") {
-                  perekNumero = "";
-               }
-               else {
-                 var numjUrl = "http://hebrew.jdotjdot.com/encode?input="+data.sections[0];
-                 var numnumResponse = UrlFetchApp.fetch(numjUrl);
-                 perekNumero = numnumResponse.getContentText();
-               }
-           data.heTitle = data.heTitle +" "+ perekNumero;
-          if(insert) {
-              insertRef(data, textSearchOr);
-           }
-           else {
-              return data;
-           }
+function findReference(reference) {
+  var url = 'http://www.sefaria.org/api/texts/'+reference+'?commentary=0&context=0';
+  var response = UrlFetchApp.fetch(url);
+  var json = response.getContentText();
+  var data = JSON.parse(json);  
+  return data;
 }
-function insertRef(data, title) {
-           var doc = DocumentApp.getActiveDocument().getBody();
-           data.text = data.text.replace(/(<(\D)>)([^<>]+)(<\/(\D)>)/g, "$3");
-           data.he = data.he.replace(/(<(\D)>)([^<>]+)(<\/(\D)>)/g, "$3"); //stopgap solution for now.
+
+function stringifyData(data, pesukim) {
+  var heTextWrapper = "", enTextWrapper = "", fromVerse = data["sections"][1];
+  
+  function addHebrewVerse(text, wrapper, pesukim, number) {
+    var editedText = text;
+    if(pesukim) {
+        editedText = "("+gematriya(number, {punctuate: false})+") "+text+"\n";
+    }
+    wrapper+=editedText;
+    return wrapper;
+  }
+  function addEnglishVerse(text, wrapper, pesukim, number) {
+    var editedText = text;
+      if(pesukim) {
+        editedText = "("+number+") "+text+"\n";
+      };
+      wrapper+=editedText;
+      return wrapper;
+  }
+
+  if(data.isSpanning) {
+    data.he.forEach(function(perekText, perekNum) {
+      if(typeof perekText == "object") {
+        perekText.forEach(function(verseText, index) {
+         heTextWrapper = addHebrewVerse(verseText, heTextWrapper, pesukim, fromVerse+index)
+        });
+        fromVerse = 1;
+      } else {
+        heTextWrapper+=perekText;
+      }
+    });
+    data.text.forEach(function(perekText, perekNum) {
+      if(typeof perekText == "object") {
+        perekText.forEach(function(verseText, index) {
+         enTextWrapper = addEnglishVerse(verseText, enTextWrapper, pesukim, fromVerse+index)
+        });
+        fromVerse = 1;
+      } else {
+        enTextWrapper+=perekText;
+      }
+    });
+  } else {
+    if(typeof data.he == "object") {
+      data.he.forEach(function(ele, index) {
+        heTextWrapper = addHebrewVerse(ele, heTextWrapper, pesukim, fromVerse+index);
+      });
+    } else {
+      heTextWrapper = data.he;
+    }
+    if(typeof data.text == "object") {
+      data.text.forEach(function(ele, index) {
+        enTextWrapper = addEnglishVerse(ele, enTextWrapper, pesukim, fromVerse+index);
+      });
+    } else {
+      enTextWrapper = data.text;
+    }
+  }
+
+  data.he = heTextWrapper;
+  data.text = enTextWrapper;
+  return data;
+};
+
+function insertReference(data, singleLanguage, iWantPesukim) {
+  data = stringifyData(data, iWantPesukim);
+  var lang = singleLanguage;
+  var title = data.ref;
+  var doc = DocumentApp.getActiveDocument().getBody();
+           var upDoc = DocumentApp.getActiveDocument();
+           var cursor = upDoc.getCursor();
+
+           var element = cursor.getElement();
+           var parent = element.getParent();
+
+           var index = parent.getChildIndex(element) + 1;
+           data.text = data.text.replace(/<[0-9a-zA-z \/\u0590-\u05FF '"=-♦]+>/g, "");
+           data.he = data.he.replace(/<[0-9a-zA-z \/\u0590-\u05FF '"=-♦]+>/g, ""); //stopgap solution for now.
+  if(lang) {
+    var tex;
+    var titleText, cursor, titlep, para, pos;
+    var nullStyle = {};
+        nullStyle[DocumentApp.Attribute.BOLD] = false;
+        nullStyle[DocumentApp.Attribute.UNDERLINE] = false;
+    var headerStyle = {};
+        headerStyle[DocumentApp.Attribute.BOLD] = true;
+        headerStyle[DocumentApp.Attribute.UNDERLINE] = true;
+    if(lang=="he") {
+      tex = data.he;
+      titleText = data.heRef;
+      titlep =  doc.insertParagraph(index, titleText).setAttributes(headerStyle).setLeftToRight(false);
+      para =  doc.insertParagraph(index+1, tex).setAttributes(nullStyle).setLeftToRight(false);
+      upDoc.setCursor(DocumentApp.getActiveDocument().getCursor().getOffset()+2);
+    }
+    else {
+      tex = data.text;
+      titleText = title;
+      cursor = DocumentApp.getActiveDocument().getCursor();
+      titlep = doc.insertParagraph(index, titleText).setAttributes(headerStyle).setLeftToRight(true);
+      para = doc.insertParagraph(index+1, tex).setAttributes(nullStyle).setLeftToRight(true);
+      pos = upDoc.newPosition(index, index+2)
+      upDoc.setCursor(pos);
+    }
+  }
+  else {
            var cells = [
-           [title, data.heTitle],
-           [data.text, ""]
+              [title, data.heRef],
+              [data.text, ""]
            ];
            var tableStyle = {};
-               tableStyle[DocumentApp.Attribute.FONT_FAMILY] =
-                DocumentApp.FontFamily.TIMES_NEW_ROMAN;
-               tableStyle[DocumentApp.Attribute.FONT_SIZE] =
-                12;
                tableStyle[DocumentApp.Attribute.BOLD] = false;
-           doc.appendTable(cells).setAttributes(tableStyle).getCell(1,1).insertParagraph(0, "").setLeftToRight(false).appendText(data.he);
+           doc.insertTable(index, cells).setAttributes(tableStyle).getCell(1,1).insertParagraph(0, "").setLeftToRight(false).appendText(data.he);
+  }
 }
+
 function sefariaSearch() {
        var searchGetHtml = HtmlService.createHtmlOutputFromFile('searchpane')
           .setTitle('Search All Texts')
@@ -142,86 +145,215 @@ function sefariaSearch() {
           .showSidebar(searchGetHtml);
 } 
 function returnTitles() {
-    var turl = 'http://www.sefaria.org/api/index/titles/';
-    var tresponse = UrlFetchApp.fetch(turl);
-    var tjson = tresponse.getContentText();
-    var tdata = JSON.parse(tjson);
-    var titleArray = tdata["books"];
+    var url = 'https://www.sefaria.org/api/index/titles/';
+    var response = UrlFetchApp.fetch(url);
+    var json = response.getContentText();
+    var data = JSON.parse(json);
+    var titleArray = data["books"];
     return titleArray;
 }
-function returnParsha(aliyah) {
-    var purl = 'http://www.sefaria.org/api/texts/parashat_hashavua';
-    var presponse = UrlFetchApp.fetch(purl);
-    var pjson = presponse.getContentText();
-    var pdata = JSON.parse(pjson);
-    if(aliyah == "haf") {
-        return pdata.haftara[0];
-     }
-     return pdata.aliyot[aliyah];
-}
-function findSearch(inp) {
-    var retdata = [];
-    var surl = 'http://d1.sefaria.org:9200/sefaria/_search?q='+inp+'&size=100';
-    var sresponse = UrlFetchApp.fetch(surl);
-    var sjson = sresponse.getContentText();
-    var sdata = JSON.parse(sjson);
-    var repetitiveArray = [];
-      for(var n = 0; n<100; n++) {
-          repetitiveArray.push(sdata["hits"]["hits"][n]["_source"]["ref"]);
-          if(sdata["hits"]["hits"][n]["_type"] == "text") {
-          retdata.push(sdata["hits"]["hits"][n]);
+
+function findSearch(input, filters) {
+   var url = 'https://www.sefaria.org/api/search/text/_search';
+   var data = {
+   "size":100,
+   "highlight":{
+      "pre_tags":[
+         "<b>"
+      ],
+      "post_tags":[
+         "</b>"
+      ],
+      "fields":{
+         "naive_lemmatizer":{
+            "fragment_size":200
+         }
       }
-     }
-    return retdata;
+   },
+   "sort":[
+      {
+         "comp_date":{
+
+         }
+      },
+      {
+         "order":{
+
+         }
+      }
+   ],
+   "query":{
+     "function_score":{
+         "field_value_factor":{
+            "field":"pagesheetrank",  // sort using pre calculated pagesheetrank values
+            "missing":0.04
+         },
+         "query": {
+              "bool":{
+                  "must":{
+                      "match_phrase":{
+                            "naive_lemmatizer":{  //querying the naive_lemmatizer field
+                            "query":input,
+                            "slop":5  // maximum distance between terms, in words
+                          }
+                        }
+                  },
+                  "filter":{
+                      "bool":{
+                        "should":[  // include a list of regular expressions that should be matched. In this case, we specify a regex on the `path` field
+                            {
+                              "regexp":{
+                                  "path": filters+".*"
+                              }
+                            }
+                        ]
+                      }
+                    }
+               }
+     
+             }
+          }
+   }
+   }
+
+  var dataToSend = JSON.stringify(data);
+  var options = { "method":"post",
+    "payload" : dataToSend
+  };
+  var response = UrlFetchApp.fetch(url, options).getContentText();
+
+  var responseJSON = JSON.parse(response);
+  var searchResults = [];
+      
+  for(var i = 0; i<responseJSON["hits"]["hits"].length; i++) {
+    searchResults.push(responseJSON["hits"]["hits"][i]);
   }
-function bibMaker() {
-   DocumentApp.getUi().alert("Add a \"Sources Cited\" section to the bottom of the page with all the sources that Sefaria can find cited in your Document.");
-   var doc = DocumentApp.getActiveDocument().getBody();
-  var bibAttr = {};
-          bibAttr[DocumentApp.Attribute.FONT_FAMILY] =
-                DocumentApp.FontFamily.CALIBRI;
-          bibAttr[DocumentApp.Attribute.FONT_SIZE] =
-                20;
-          bibAttr[DocumentApp.Attribute.BOLD] =
-                true;
-  var text = doc.editAsText().getText();
-  var titleList = returnTitles();
-  titleList = titleList.join("|");
-  var reg = "("+titleList+" )?( )?\\d+[ab]?(:\\d+(-\\d+)?)?"; //add better " " to tlist
-  var regexpr = new RegExp(reg, "gi");	
-  var regarr = text.match(regexpr);
-  if(!regarr) {
-    DocumentApp.getUi().alert("Uh-oh...", "You have no sources in your Doc!", DocumentApp.getUi().ButtonSet.OK_CANCEL); 
-    return;
-  }
-  doc.appendParagraph("Sources Cited:").setAttributes(bibAttr);
-  function recFind(src, arr, re) {
-    if(re.test(arr[src])) {
-       var val = arr[src].split(" ");
-       val.pop();
-       return val.join(" ");
-    }
-    else {
-       return recFind(src-1, arr, re);
-    }
-  }
-  for(var bib = 0; bib < regarr.length; bib++) {
-    var regsp = /[a-z]/i;
-    if (regsp.test(regarr[bib])) {
-      findRef(regarr[bib], true);
-    }
-    else {
-      regarr[bib] = recFind(bib, regarr, regsp)+" "+regarr[bib];
-      regarr[bib] = regarr[bib].replace(/\s+/, " ");
-      findRef(regarr[bib], true);
-    }
-  }
+   
+  return searchResults;
 }
 
-          ///                                         //        \
-        //////                                      \     \\\\\  \\\
-      ///****//                                      \         \    \
-    ///////*////                                      \     \   \    \          
-     //****///          
-      //////
-       ///
+function openSettings() {
+  var html = HtmlService.createHtmlOutputFromFile('settings.html')
+      .setWidth(400)
+      .setHeight(300);
+  DocumentApp.getUi().showModalDialog(html, 'Settings');
+}
+
+
+/*
+ * Convert numbers to gematriya representation, and vice-versa.
+ *
+ * Licensed MIT.
+ *
+ * Copyright (c) 2014 Eyal Schachter
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+	var letters = {}, numbers = {
+		'': 0,
+		א: 1,
+		ב: 2,
+		ג: 3,
+		ד: 4,
+		ה: 5,
+		ו: 6,
+		ז: 7,
+		ח: 8,
+		ט: 9,
+		י: 10,
+		כ: 20,
+		ל: 30,
+		מ: 40,
+		נ: 50,
+		ס: 60,
+		ע: 70,
+		פ: 80,
+		צ: 90,
+		ק: 100,
+		ר: 200,
+		ש: 300,
+		ת: 400,
+		תק: 500,
+		תר: 600,
+		תש: 700,
+		תת: 800,
+		תתק: 900,
+		תתר: 1000
+	}, i;
+	for (i in numbers) {
+		letters[numbers[i]] = i;
+	}
+
+	function gematriya(num, options) {
+		if (options === undefined) {
+			var options = {limit: false, punctuate: true, order: false, geresh: true};
+		}
+
+		if (typeof num !== 'number' && typeof num !== 'string') {
+			throw new TypeError('non-number or string given to gematriya()');
+		}
+
+		if (typeof options !== 'object' || options === null){
+			throw new TypeError('An object was not given as second argument')
+		}
+
+		var limit = options.limit;
+		var order = options.order;
+		var punctuate = typeof options.punctuate === 'undefined' ? true : options.punctuate;
+		var geresh = typeof options.geresh === 'undefined' && punctuate ? true : options.geresh;
+
+		var str = typeof num === 'string';
+
+		if (str) {
+			num = num.replace(/('|")/g,'');
+		}
+		num = num.toString().split('').reverse();
+		if (!str && limit) {
+			num = num.slice(0, limit);
+		}
+
+		num = num.map(function g(n,i){
+			if (str) {
+				return order && numbers[n] < numbers[num[i - 1]] && numbers[n] < 100 ? numbers[n] * 1000 : numbers[n];
+			} else {
+				if (parseInt(n, 10) * Math.pow(10, i) > 1000) {
+					return g(n, i-3);
+				}
+				return letters[parseInt(n, 10) * Math.pow(10, i)];
+			}
+		});
+
+		if (str) {
+			return num.reduce(function(o,t){
+				return o + t;
+			}, 0);
+		} else {
+			num = num.reverse().join('').replace(/יה/g,'טו').replace(/יו/g,'טז').split('');
+
+			if (punctuate || geresh)	{
+				if (num.length === 1) {
+					num.push(geresh ? '׳' : "'");
+				} else if (num.length > 1) {
+					num.splice(-1, 0, geresh ? '״' : '"');
+				}
+			}
+
+			return num.join('');
+		}
+	}
