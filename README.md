@@ -1,8 +1,4 @@
-SefariaAddOn-Google
+Sefaria Add On for Google Docs
 ===================
 
-A Google addon for Sefaria.
-<a href="https://github.com/shman/SefariaAddOn-Google/wiki">Setup and Wiki</a>
-<br>
-All <b>code-related</b> issues are under the issues tab.
-<br><b>Publishing</b> issues are in the Checklist.md file.
+A Google Docs add on using the Sefaria API (not an official Sefaria project, but featured on the Powered by Sefaria page on Sefaria's github wiki for several years!)
