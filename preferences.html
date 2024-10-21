@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+
+    <!--STYLESHEETS-->
+    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons.css">
+    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/themes/smoothness/jquery-ui.css" />
+
+    <style>
+      #results {
+        color: green;
+      }
+      preference {
+        display: block;
+      }
+      .hide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 600px;
+        height: 400px;
+        background: rgba(255,255,255,0.5);
+        z-index: 2;
+      }
+      [class=hide] > img {
+        position: absolute;
+        top: 48%; 
+        left: 48%;
+      }
+    </style>
+
+    <!--SCRIPTS-->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
+
+  </head>
+  <body>
+    <aside class="hide">
+      <img src="https://www.sefaria.org/static/img/ajax-loader.gif">
+    </aside>
+
+    <section name="actions">
+      <button class="blue submit">Update Preferences
+      </button>
+      <span id="results"></span>
+    <section name="orthography">
+      <h1>
+        Orthography
+      </h1>
+      <preference>
+        <input type="checkbox" name="nekudot"> Nekudot
+        <select name="nekudot_filter">
+          <option value="always">when possible</option>
+          <option value="tanach">only in Tanach/Bible</option>
+        </select>
+      </preference>
+      <preference>
+        <input type="checkbox" name="teamim"> Ta'amei HaMiqra
+      </preference>
+    </section>
+
+    <section name="sheimot">
+      <h1>
+        Sheimot
+      </h1>
+
+      <preference>
+        <input type="checkbox" name="meforash_replace"> Replace יהוה with
+      
+        <select name="meforash_replacement">
+          <option value="ה'">ה'</option>
+          <option value="יקוק">יקוק</option>
+          <option value="השם">השם</option>
+          <option value="ד'">ד'</option>
+          <option value="ידוד">ידוד</option>
+          <option value="יהו-ה">יהו-ה</option>
+          <option value="יחוח">יחוח</option>
+        </select>
+      </preference>
+      
+      <preference>
+        <input type="checkbox" name="yaw_replace"> Replace יה with
+        <select name="yaw_replacement">
+          <option value="קה">קה</option>
+          <option value="השם">השם</option>
+        </select>
+      </preference>
+
+      <preference>
+        <input type="checkbox" name="elodim_replace"> Replace אלוהים with
+        <select name="elodim_replacement">
+          <option value="אלוקים">אלוקים</option>
+          <option value="אלודים">אלודים</option>
+        </select>
+      </preference>
+
+    </section>
+
+    <!---broken right now---
+    <section name="comments">
+      <h1>
+        Extended Material
+      </h1>
+      <input type="checkbox" name="extended_gemara"> Insert translation only from Davidson Talmud, not explanation 
+    </section>
+    ---end broken--->
+
+    <!--
+    <section name="general">
+      <h1>
+        General Settings
+      </h1>
+      <input type="checkbox" class="version-check" checked> Display version-selection drop-downs  
+    </section>
+    -->
+    <script>
+      // no need for document-ready syntax since we're at the end of the document
+      // load current preferences
+      google.script.run.withSuccessHandler((preferences) => {
+        console.log(preferences);
+        let checkboxes = document.querySelectorAll(`[type="checkbox"]`);
+        for (let n = 0; n < checkboxes.length; n++) {
+          let checkbox = checkboxes[n].name;
+          if (preferences[checkbox] == "true") {
+            console.log(`Setting ${checkboxes[n].name}`)
+            checkboxes[n].checked = true;
+          }
+        }
+        let selectors = document.querySelectorAll(`select`);
+        for (let j = 0; j < selectors.length; j++) {
+          selectors[j].value = preferences[selectors[j].name];
+        }
+        $('.hide').fadeOut(1000);
+      }).getPreferences();
+      
+      // handle updates
+      $('.submit').click(() => {
+        $('#results').html(`<img src="https://www.sefaria.org/static/img/ajax-loader.gif">`);
+        let preferenceObject = {};
+        $("select").each((index, element) => {
+          preferenceObject[$(element).attr("name")] = $(element).val();
+        });
+        $("input[type='checkbox']").each((index, element) => {
+          let checked = $(element).is(":checked");
+          preferenceObject[$(element).attr("name")] = checked;
+        });
+        google.script.run.withSuccessHandler(() => {
+          $('#results').html("Successfully updated preferences.");
+        }).setPreferences(preferenceObject);
+      });
+    </script>
+  </body>
+</html>

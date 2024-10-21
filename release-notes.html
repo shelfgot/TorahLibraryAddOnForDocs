@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <!--STYLESHEETS-->
+    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons.css">
+    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/themes/smoothness/jquery-ui.css" />
+
+  </head>
+  <body>
+<h2>Introducing version 2.0</h2>
+<p>A general word (and caution): this is the most significant update I have made to the codebase since 2014. I hope that the new and improved add-on will be far more useful than its predecessor, and I am sure that in the first few months, things will break - bear with me as we make this add-on work well together!</p>
+<p>1. Probably the most important change - the HTML tags which were interpolated into the text, noted by many many people are gone.</p> 
+<p>2. Not only are the tags gone, but the styling has been applied to the insertions. This means that bold and italic-heavy texts, e.g. the Bavli in English translation, now display beautifully in the documents. (If there is enough interest in some of the incredibly useful footnotes, e.g. the Tanach JPS ones, I can try and see if it would be possible to add footnotes to the sources in Google Docs and insert the Sefaria-provided footnotes.)</p>
+<p>3. Numbering used to be based on input rather than the response provided from the Sefaria API, for some inexplicable reason decided at the outset of the development of version 1.0. (probably convenience.) In older versions, searching “Daniel 1-2” would result in pesukim marked “NaN” (“not a number”) or simply blank pesukim. In the current version this is fixed.</p>
+<p>4. The preferences have been completely overhauled, in accordance with many many many requests. There is now global Sheimot/Sheimos/holy name replacement as well as an Orthography section, under which global preferences for nikkud and ta’amei ha’miqra can be set. [Again, if there is enough interest, these can be made into local settings as opposed to global ones.] </p>
+<p>5. The desired translation/version (when multiple exist; e.g. for now Tanach, Gemara, maybe one day the Sefer haEshkol) can be selected from a drop-down menu when previewing the source. As of yet, an economical way to do this in the search module has not been found, but מהיות טוב אל תקרא רע and this update is long overdue in any event.</p>
+<p>6. The search module has been updated to have an option to use Sefaria's implementation of PageRank (another easy but far-reaching change overlooked by moi for many years), and now works far better, as well as allows for exact searches.</p>
+<p>7. The title which appears in suggestions and is inserted is the one which user inputs, not the normalized version from Sefaria. E.g., typing in Bereishit 12:15 yields Bereishit 12:15 and not Genesis 12:15, as in the older version.</p>
+<p>8. For the code aesthetes - while the codebase isn't perfect, and I'm no expert in ES6,, it smells far better. I've refactored the core functionality, which I haven't made substantial changes to in a decade, and brought it to be far closer to being in line both with modern (if not edge-of-your-seat current) ES6 as well as accepted style dictates. It ain't Typescript, but it's far better than what it was before.</p>
+<p>9. I did add a tab to both send feature requests / well-wishes / a buy-me-a-coffee button. Dealing with the programming but also the ecosystem (as many wonderful folks pointed out, the app was blocked for a couple of months, and this was part of the impetus to simply start from scratch) takes a lot of time and energy, and getting support - in words and perhaps even in the monies needed to maintain, update, and upgrade this project - is a huge incentive to keep the add-on in ship-shape and to ensure that the over 100,000 uses this add-on clocks (on a good week) run smoothly.</p>
+<h2>Next steps</h2>
+	Apart from the lacunae noted above which still need to be filled, as well as some other fixes (multiple and more granular filters for the search page and an icon to show whether the search result is in Hebrew only or in multiple languages; an option to remove the explanation from the Davidson Talmud), I have some other ideas for the future of the add-on. One project I hope to implement is an automated “mekorot sheet parser”. Many teachers who convey shiurim in Tanach and Gemara provide lists of mekorot, or sources, and the student is given the task to look up and collate these sources. An automated system which converts such a list into the full sheet of mekorot would save countless hours. Similarly — but perhaps less important — a way to generate a sheet of mekorot from an article in which various references are quoted. At the risk of poking the bear, it might also be nice to have a way to import source sheets from Sefaria to serve as bases from which to remix, collaborate, etc.
+<h2>Credits</h2>
+Many thanks to I.S., R’ Z.B., N.O., and Mrs. S.S. for their helpful comments. A huge thank you to the Sefaria development team (especially Russell Neiss and Noah Santacruz) for their support. It is truly a pleasure to develop with an API whose lead team members are so responsive to any query.
+<h2>Sign off</h2>
+Please feel free to reach out with any questions, bug reports, and/or suggestions either by <a href="mailto:shlomi.helfgot@yale.edu" target="_blank"> email or on <a href="https://github.com/shelfgot/SefariaAddOnForDocs">Github</a>! Can't wait to connect.
+- b'virkat ha'torah (with torah blessings) Shlomi Helfgot
+<img height="50px" width="50px" src="">
+  </body>
+</html>

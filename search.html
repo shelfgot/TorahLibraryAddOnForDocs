@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+  <html>
+    <head>
+      <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons.css">
+      <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/themes/smoothness/jquery-ui.css" />
+      
+      <style>
+        .source:hover {
+          cursor: pointer;
+          background: rgba(122, 122, 122, 0.5);
+        }
+
+        .source {
+          padding: 5px;
+        }
+
+        .source-title {
+          font-size: 6vw; 
+          line-height: 6vw;
+        }
+
+        .he {
+          direction: rtl;
+        }
+
+        header {
+          display: flex !important;
+          justify-content: space-between !important;
+        }
+
+        /* extremely ungainly usage of !important, need to fix at some point */
+        .input {
+          margin-top: 10px !important; 
+          margin-left: 10px !important;  
+          width: 155px !important; 
+          height: 9.8vw !important;
+        }
+
+        .button {
+          font-size: 3.8vw !important; 
+          margin-right: 10px !important;  
+          margin-top: 10px !important; 
+          width: 93px !important;
+        }
+
+        .select-filters {
+          width: 265px !important; 
+          margin-left: 10px !important; 
+          margin-top:10px !important;
+        }
+
+        .suggestions {
+          margin-left: 10px; 
+          margin-top: 10px; 
+          width: 280px; 
+          overflow-x: hidden; 
+          overflow-y: scroll;
+          height: 73vh !important;
+        }
+
+        .searchPrompt {
+          display: block; 
+          margin-right: 10px !important;
+        }
+
+        .hide {
+          display: none; 
+          position: absolute; 
+          top: 0; 
+          left: 0; 
+          width: 100%; 
+          height: 100%; 
+          color: black; 
+          background: white; 
+          z-index: 5; 
+        }
+
+        .bottom {
+          position: fixed; 
+          background: white;
+        }
+
+        [name=loading] {
+          position: absolute; 
+          top: 48%; 
+          left: 48%;
+        }
+      </style>
+
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
+      </script>
+
+      <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js">
+      </script>
+    </head>
+
+    <body>
+      <header>
+        <input type="text" class="input" placeholder="Search Text">
+        <input type="button" value="Search" class="button blue">
+      </header>
+      <section>
+        <select class="select-filters">
+          <option value="" selected>in: All</option>
+          <option value="Tanakh">in: Tanach</option>
+          <option value="Mishnah">in: Mishnah</option>
+          <option value="Talmud">in: Talmud</option>
+          <option value="Halakhah">in: Halakhah</option>
+          <option value="Midrash">in: Midrash</option>
+          <option value="Kabbalah">in: Kabbalah</option>
+          <option value="Liturgy">in: Liturgy</option>
+          <option value="Philosophy">in: Philosophy</option>
+          <option value="Tanaitic">in: Tanaitic</option>
+          <option value="Chasidut">in: Chasidut</option>
+          <option value="Musar">in: Musar</option>
+          <option value="Apocrypha">in: Apocrypha</option>
+          <option value="Modern Works">in: Modern Works</option>
+          <option value="Reference">in: Reference</option>
+          <option value="Other">in: Other</option>
+        </select>
+      </section>
+      <br>
+
+      <section class="suggestions">
+        <b class="searchPrompt">Search Sefaria's library of Jewish texts for any phrase in any supported language. </b>
+      </section>
+
+      <footer class="sidebar bottom">
+        <nav name="options">
+          <p>
+            <input type="checkbox" class="wants-pagerank">Use PageRank
+            <input type="checkbox" class="wants-pesukim" checked>Pesukim/line markers
+            <input type="checkbox" class="language-preference">Insert source in 
+            <select class="language-selection">
+              <option value="he" class="heb" selected>Hebrew</option>
+              <option value="en" class="eng">English</option>
+            </select> only
+          </p>
+        </nav>
+        <section name="branding">
+          <span class="watermark" style="display: flex">
+            <span class="gray branding-text">Add-on by <a  target="_blank" href="https://www.github.com/shelfgot/">Shlomi Helfgot</a> &nbsp; </span>
+            <a  target="_blank" href="https://www.buymeacoffee.com/shlomihelfr"><img height="27em" src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=shlomihelfr&button_colour=ffa82e&font_colour=000000&font_family=Inter&outline_colour=000000&coffee_colour=FFDD00" /></a>
+          </span>
+        </section>
+      </footer>
+
+      <aside class="hide">
+        <img src="https://www.sefaria.org/static/img/ajax-loader.gif" name="loading">
+      </aside>
+
+    <!--LOCAL SCRIPT-->
+    
+    <script>
+    $('.button').click(() => {
+        let filterVal = $('.select-filters').val();
+        console.log(filterVal);
+        let filters = [];
+
+        if (filterVal != "") {
+          filters.push(filterVal)
+        }
+        
+        
+        let input = $('.input').val();
+        console.log(`${filters} and ${input}`);
+        let pageRank = $('.wants-pagerank').is(':checked');
+
+        $('.suggestions').html(`<img src="https://www.sefaria.org/static/img/ajax-loader.gif" class="search_loading">`);
+
+        google.script.run.withSuccessHandler((response) => {
+            $('.suggestions').html('');
+            for (let i = 0; i < response.length; i++) {
+                let rtl = response[i]["_source"]["lang"];
+                let text = `
+                    <div class='source ${rtl}'>
+                      <h3 class='ref' number='${i}'>${response[i]["_source"]["heRef"]}
+                        <p class='hidden source-${i}' hidden>${response[i]["_source"]["ref"]}</p>
+                      </h3>
+                        <p>
+                          ${response[i]["highlight"]["naive_lemmatizer"][0]}
+                        </p>
+                    </div>
+                  `;
+                $('.suggestions').append(text);
+                
+            }
+
+            $('.source').click((event) => {
+                let element = $(event.currentTarget);
+                let language;
+
+                if ($('.language-preference').is(':checked')) {
+                  language = $('.language-selection').val();
+                }
+
+                
+
+                let wantsPesukim = $('.wants-pesukim').val();
+                let number = element.children('.ref').first().attr('number');
+                let classname = `.source-${number}`;
+                let reference = $(classname).text();
+                
+                console.log("clicked!"+reference);
+
+                $('.hide').add($('.warning')).fadeIn('1000');
+                google.script.run.withSuccessHandler((payload) => {
+
+                      $('.hide').add($('.warning')).fadeOut('1000');
+                      google.script.run.insertReference(payload, language, wantsPesukim);
+
+                }).findReference(reference);
+            });
+
+          }).findSearch(input, filters, pageRank);
+    });  
+    </script>
+  </body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <!--STYLESHEETS AND SCRIPTS-->
+    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons.css">
+    <style>
+      main {
+        padding-left: 10px;
+        padding-right: 10px;
+        text-align: justify;
+      }
+      .spinner {
+        padding: 10px !important;
+      }
+      .quote {
+        margin-top: 5px;
+        direction: rtl !important;
+        text-align:right;
+      }
+    </style>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  </head>
+  <body>
+    <main>
+      <h1>Popcorn (beta)</h1>
+      Popcorn is an implementation of a game known as <a href="https://en.m.wikipedia.org/wiki/PowerPoint_karaoke" target="_blank">Powerpoint Karaoke, or battledecks</a>, in which the participant receives a set of random slides and must make a presentation. Here, we replace the slides with a set of five randomized sources (currently, in this beta, only Tanach and Talmud).<br><br>
+      <span class="quote">דברי חכמים כדור בנות... (ע"פ תנחומא בהעלותך טו:א)</span>
+      <br><br>
+      <button class="blue submit">Make popcorn
+      </button>
+      <section>
+        <span class="spinner" hidden><img src="https://www.sefaria.org/static/img/ajax-loader.gif"></span>
+      </section>
+    </main>
+    <script>
+      $('.submit').click(() => {
+        $('.spinner').fadeIn(1000);
+        google.script.run.withSuccessHandler(()=>{
+          $('.spinner').fadeOut(1000);
+        }).insertPopcorn();
+      });
+    </script>
+  </body>
+</html>
